@@ -1,0 +1,24 @@
+services:
+  app:
+    shm_size: '8g'
+    build:
+      dockerfile: Dockerfile
+    container_name: ai-rec
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    networks:
+      - ai-rec-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    runtime: nvidia
+
+networks:
+  ai-rec-net:
+    driver: bridge

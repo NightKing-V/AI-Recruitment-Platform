@@ -1,14 +1,15 @@
 import os
 import sys
-from app.ui.app import App
+import streamlit as st
 
-# Make sure Python can find other app modules
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+# Add the current directory to Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
 
+# Now import the app
+from ui.app import App
 
 # Application entry point
 if __name__ == "__main__":
     app = App()
     app.run()
-    
-    

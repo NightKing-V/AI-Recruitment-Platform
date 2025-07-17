@@ -7,7 +7,7 @@ class RecommendationsPage:
     # def __init__ (self):
     #     self.setup_recommendations_page()
         
-    def setup_recommendations_page(self):
+    def render(self):
         # RECOMMENDATIONS PAGE
         with st.container():
             st.header("🎯 Job Recommendations")

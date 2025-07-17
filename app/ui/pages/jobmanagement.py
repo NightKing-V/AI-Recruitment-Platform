@@ -5,12 +5,14 @@ class JobManagementPage:
     # def __inti__ (self):
     #     self.setup_jop_management_page()
         
-    def setup_jop_management_page(self):
+    def render(self):
         # JOB MANAGEMENT PAGE
         with st.container():
-            st.subheader("📋 Job Management")
+            st.subheader("Job Management")
             
-            tab1, tab2, tab3 = st.tabs(["Generate Jobs", "Upload Job", "View Jobs"])
+            st.markdown('</br>', unsafe_allow_html=True)
+            
+            tab1, tab2, tab3 = st.tabs(["Generate Jobs", "Create Job", "View Jobs"])
             
             with tab1:
                 st.write("Generate Job Descriptions")

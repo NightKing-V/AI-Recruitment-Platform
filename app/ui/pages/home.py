@@ -26,7 +26,7 @@ class HomePage:
         </style>
         """, unsafe_allow_html=True)
         
-    def setup_home_page(self):
+    def render(self):
         
 
         with st.container():

@@ -9,13 +9,13 @@ import plotly.graph_objects as go
 from io import StringIO
 import base64
 
-from ui.components.header import Header
-from ui.components.sidebar import Sidebar
-from ui.components.footer import Footer
-from ui.pages.analytics import AnalyticsPage
-from ui.pages.jobmanagement import JobManagementPage
-from ui.pages.recommendations import RecommendationsPage
-from ui.pages.home import HomePage
+from ui.components.Header import Header
+from ui.components.Sidebar import Sidebar
+from ui.components.Footer import Footer
+from ui.pages.Analytics import AnalyticsPage
+from ui.pages.JobManagement import JobManagementPage
+from ui.pages.Recommendations import RecommendationsPage
+from ui.pages.Home import HomePage
 
 
 
@@ -235,19 +235,19 @@ class App:
         home_tab, job_tab, rec_tab, ana_tab = st.tabs(["Home", "Job Management", "Recommendations", "Analytics"])
         # Home Page
         with home_tab:
-            self.home_page.setup_home_page()
+            self.home_page.render()
         
         # Job Management Page
         with job_tab:
-            self.job_management_page.setup_jop_management_page()
+            self.job_management_page.render()
         
         # Recommendations Page
         with rec_tab:
-            self.recommendations_page.setup_recommendations_page()
+            self.recommendations_page.render()
         
         # Analytics Page
         with ana_tab:
-            self.analytics_page.setup_analytics_page()
+            self.analytics_page.render()
         
         # Render footer
-        self.footer.setup_footer()
+        self.footer.render()

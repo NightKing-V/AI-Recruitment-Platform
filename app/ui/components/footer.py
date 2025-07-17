@@ -5,7 +5,7 @@ class Footer:
     # def __init__(self):
     #     self.setup_footer()
         
-    def setup_footer(self):
+    def render(self):
         # Footer
         st.markdown("---")
         st.markdown("""

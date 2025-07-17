@@ -5,7 +5,7 @@ class AnalyticsPage:
     # def __init__(self):
     #     self.setup_analytics_page()
         
-    def setup_analytics_page(self):
+    def render(self):
         # ANALYTICS PAGE
         with st.container():
             st.header("📊 Analytics Dashboard")

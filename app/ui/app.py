@@ -14,7 +14,6 @@ from ui.components.sidebar import Sidebar
 from ui.components.footer import Footer
 from ui.pages.analytics import AnalyticsPage
 from ui.pages.jobmanagement import JobManagementPage
-from ui.pages.resumeupload import ResumeUploadPage
 from ui.pages.recommendations import RecommendationsPage
 from ui.pages.home import HomePage
 
@@ -28,7 +27,6 @@ class App:
         self.footer = Footer()
         self.analytics_page = AnalyticsPage()
         self.job_management_page = JobManagementPage()
-        self.resume_upload_page = ResumeUploadPage()
         self.recommendations_page = RecommendationsPage()
         self.home_page = HomePage()
         
@@ -232,9 +230,9 @@ class App:
         self.header.render()
         
         # Render sidebar
-        self.sidebar.setup_sidebar()
+        self.sidebar.render()
         
-        home_tab, job_tab, res_tab, rec_tab, ana_tab = st.tabs(["Home", "Job Management", "Resume Upload", "Recommendations", "Analytics"])
+        home_tab, job_tab, rec_tab, ana_tab = st.tabs(["Home", "Job Management", "Recommendations", "Analytics"])
         # Home Page
         with home_tab:
             self.home_page.setup_home_page()
@@ -242,10 +240,6 @@ class App:
         # Job Management Page
         with job_tab:
             self.job_management_page.setup_jop_management_page()
-        
-        # Resume Upload Page
-        with res_tab:
-            self.resume_upload_page.setup_resume_upload_page()
         
         # Recommendations Page
         with rec_tab:

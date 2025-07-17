@@ -1,6 +1,6 @@
 import os
 import sys
-from ui.app import App
+from app.ui.app import App
 
 # Make sure Python can find other app modules
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
@@ -10,3 +10,5 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 if __name__ == "__main__":
     app = App()
     app.run()
+    
+    

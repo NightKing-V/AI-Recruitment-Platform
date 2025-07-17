@@ -7,5 +7,10 @@ class LLMProvider(ABC):
         pass
     
     @abstractmethod
-    def get_llm(self):
+    def get_llm(self) -> LLM:
         pass
+    
+    @abstractmethod
+    def reset_llm(self):
+        pass
+    

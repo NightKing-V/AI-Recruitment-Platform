@@ -4,8 +4,6 @@ import numpy as np
 import json
 import time
 from datetime import datetime
-import plotly.express as px
-import plotly.graph_objects as go
 from io import StringIO
 import base64
 

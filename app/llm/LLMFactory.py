@@ -1,0 +1,55 @@
+from typing import Dict, Type, Optional
+from langchain_core.language_models.llms import LLM
+from .LLMProvider import LLMProvider
+from .clients.GroqClient import GroqClient
+
+
+class LLMFactory:
+
+    _providers: Dict[str, Type[LLMProvider]] = {}
+    _instances: Dict[str, LLMProvider] = {}
+    
+    @classmethod
+    def register_provider(cls, provider_name: str, provider_class: Type[LLMProvider]):
+        cls._providers[provider_name.lower()] = provider_class
+    
+    @classmethod
+    def get_provider(cls, provider_name: str) -> LLMProvider:
+        provider_name = provider_name.lower()
+        
+        if provider_name not in cls._providers:
+            raise ValueError(f"Provider '{provider_name}' is not registered. "
+                           f"Available providers: {list(cls._providers.keys())}")
+
+        if provider_name not in cls._instances:
+            cls._instances[provider_name] = cls._providers[provider_name]()
+        
+        return cls._instances[provider_name]
+    
+    @classmethod
+    def create_llm(cls, provider_name: str, **kwargs) -> LLM:
+        provider = cls.get_provider(provider_name)
+        return provider.create_llm(**kwargs)
+    
+    @classmethod
+    def get_llm(cls, provider_name: str) -> LLM:
+        provider = cls.get_provider(provider_name)
+        return provider.get_llm()
+    
+    @classmethod
+    def reset_provider(cls, provider_name: str):
+        provider_name = provider_name.lower()
+        if provider_name in cls._instances:
+            provider = cls._instances[provider_name]
+            if hasattr(provider, 'reset_llm'):
+                provider.reset_llm()
+            del cls._instances[provider_name]
+
+"""
+# to Register default providers
+# LLMFactory.register_provider('groq', GroqClient)
+
+# to add more providers like this:
+# LLMFactory.register_provider('openai', OpenAIClient)
+# LLMFactory.register_provider('anthropic', AnthropicClient)
+"""

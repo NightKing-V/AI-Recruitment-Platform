@@ -6,6 +6,7 @@ requests
 httpx
 tqdm
 numpy
+plotly
 
 # === Embeddings + Vector DB ===
 sentence-transformers
@@ -15,5 +16,6 @@ qdrant-client
 PyMuPDF  # For extracting text from resumes
 
 # === LangChain ===
+langchain-groq
 langchain>=0.1.16
 langchain-community>=0.0.30

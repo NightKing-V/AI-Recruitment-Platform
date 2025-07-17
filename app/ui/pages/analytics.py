@@ -2,8 +2,8 @@ import streamlit as st
 
 
 class AnalyticsPage:
-    def __init__(self):
-        self.setup_analytics_page()
+    # def __init__(self):
+    #     self.setup_analytics_page()
         
     def setup_analytics_page(self):
         # ANALYTICS PAGE
@@ -11,7 +11,8 @@ class AnalyticsPage:
             st.header("📊 Analytics Dashboard")
             
             # Use mock data for demonstration
-            jobs_data = st.session_state.job_descriptions if st.session_state.job_descriptions else mock_jobs
+            jobs_data = None
+            # st.session_state.job_descriptions if st.session_state.job_descriptions else mock_jobs
             
             if not jobs_data:
                 st.info("No data available for analytics. Please generate some job descriptions first.")

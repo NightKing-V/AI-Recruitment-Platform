@@ -9,14 +9,14 @@ import plotly.graph_objects as go
 from io import StringIO
 import base64
 
-from app.ui.components.header import Header
-from app.ui.components.sidebar import Sidebar
-from app.ui.components.footer import Footer
-from app.ui.pages.analytics import AnalyticsPage
-from app.ui.pages.jobmanagement import JobManagementPage
-from app.ui.pages.resumeupload import ResumeUploadPage
-from app.ui.pages.recommendations import RecommendationsPage
-from app.ui.pages.home import HomePage
+from ui.components.header import Header
+from ui.components.sidebar import Sidebar
+from ui.components.footer import Footer
+from ui.pages.analytics import AnalyticsPage
+from ui.pages.jobmanagement import JobManagementPage
+from ui.pages.resumeupload import ResumeUploadPage
+from ui.pages.recommendations import RecommendationsPage
+from ui.pages.home import HomePage
 
 
 
@@ -32,15 +32,15 @@ class App:
         self.recommendations_page = RecommendationsPage()
         self.home_page = HomePage()
         
-        # Initialize session state
-        if 'job_descriptions' not in st.session_state:
-            st.session_state.job_descriptions = []
-        if 'resume_data' not in st.session_state:
-            st.session_state.resume_data = None
-        if 'recommendations' not in st.session_state:
-            st.session_state.recommendations = []
-        if 'uploaded_file' not in st.session_state:
-            st.session_state.uploaded_file = None
+        # # Initialize session state
+        # if 'job_descriptions' not in st.session_state:
+        #     st.session_state.job_descriptions = []
+        # if 'resume_data' not in st.session_state:
+        #     st.session_state.resume_data = None
+        # if 'recommendations' not in st.session_state:
+        #     st.session_state.recommendations = []
+        # if 'uploaded_file' not in st.session_state:
+        #     st.session_state.uploaded_file = None
             
 
     def setup_page(self):
@@ -55,20 +55,9 @@ class App:
         # Custom CSS for better styling
         st.markdown("""
         <style>
-            .main-header {
-                background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-                padding: 2rem;
-                border-radius: 10px;
-                color: white;
-                margin-bottom: 2rem;
-            }
-            
-            .metric-card {
-                background: white;
-                padding: 1rem;
-                border-radius: 8px;
-                border: 1px solid #e0e0e0;
-                text-align: center;
+            /* Reduce default Streamlit top padding */
+            .block-container {
+                padding-top: 0.5rem !important;
             }
             
             .job-card {
@@ -123,8 +112,38 @@ class App:
                 text-align: center;
                 background: #f9f9f9;
             }
+            
+            /* Tab container spacing */
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 4px;
+                margin-bottom: 10px;
+            }
+
+            /* Individual tab styling */
+            .stTabs [data-baseweb="tab"] {
+                background-color: transparent;
+                border-radius: 6px 6px 6px 6px;
+                padding: 8px 16px;
+                font-size: 14px;
+                color: #ffff;
+                transition: background-color 0.2s ease;
+            }
+
+            /* Active tab */
+            .stTabs [aria-selected="true"] {
+                background-color: #667eea;
+                font-weight: 600;
+                color: #fff;
+            }
+
+            /* Hover effect */
+            .stTabs [data-baseweb="tab"]:hover {
+                background-color: #764ba2;
+                color: #fff;
+            }
         </style>
-        """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
 
 
         # Mock data for demonstration
@@ -213,28 +232,28 @@ class App:
         self.header.render()
         
         # Render sidebar
-        self.sidebar.render()
+        self.sidebar.setup_sidebar()
         
-        with st.tabs(["Home", "Job Management", "Resume Upload", "Recommendations", "Analytics"]):
-            # Home Page
-            with st.tab("Home"):
-                self.home_page.render()
-            
-            # Job Management Page
-            with st.tab("Job Management"):
-                self.job_management_page.render()
-            
-            # Resume Upload Page
-            with st.tab("Resume Upload"):
-                self.resume_upload_page.render()
-            
-            # Recommendations Page
-            with st.tab("Recommendations"):
-                self.recommendations_page.render()
-            
-            # Analytics Page
-            with st.tab("Analytics"):
-                self.analytics_page.setup_analytics_page()
+        home_tab, job_tab, res_tab, rec_tab, ana_tab = st.tabs(["Home", "Job Management", "Resume Upload", "Recommendations", "Analytics"])
+        # Home Page
+        with home_tab:
+            self.home_page.setup_home_page()
+        
+        # Job Management Page
+        with job_tab:
+            self.job_management_page.setup_jop_management_page()
+        
+        # Resume Upload Page
+        with res_tab:
+            self.resume_upload_page.setup_resume_upload_page()
+        
+        # Recommendations Page
+        with rec_tab:
+            self.recommendations_page.setup_recommendations_page()
+        
+        # Analytics Page
+        with ana_tab:
+            self.analytics_page.setup_analytics_page()
         
         # Render footer
-        self.footer.render()
+        self.footer.setup_footer()

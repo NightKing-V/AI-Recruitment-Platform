@@ -9,11 +9,12 @@ numpy
 plotly
 
 # === Embeddings + Vector DB ===
-sentence-transformers
+pymongo[srv]
 qdrant-client
 
-# === PDF Parsing ===
+# === Doc Parsing ===
 PyMuPDF  # For extracting text from resumes
+python-docx
 
 # === LangChain ===
 langchain-groq

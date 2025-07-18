@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 import streamlit as st
 
+
 class MongoDBHandler:
     """Handle MongoDB operations for job descriptions and resumes"""
     

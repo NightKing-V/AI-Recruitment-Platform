@@ -6,7 +6,7 @@ from data.mongodb.MongoClient import MongoDBHandler
 
 
 class JobManagementPage:
-    def __inti__ (self):
+    def __init__ (self):
         self.job_handler = jobHandler()
         self.mongo_handler = MongoDBHandler()
         

@@ -1,19 +1,17 @@
 import streamlit as st
-import time
-import fitz  # PyMuPDF
-import docx
-import io
-import requests
-import json
-from typing import Dict, Any, Optional
 
 from services.FileProcessor import FileProcessor
 from llm.LLMProcessor import LLMProcessor
+from data.mongodb.MongoClient import MongoDBHandler
 
 
 
 class Sidebar:
     def __init__(self):
+        self.llm_processor = LLMProcessor()
+        self.mongo_handler = MongoDBHandler()
+        self.file_processor = FileProcessor()
+        
         # Initialize session state for resume data
         if 'resume_data' not in st.session_state:
             st.session_state.resume_data = None
@@ -107,7 +105,7 @@ class Sidebar:
             
             # Extract text from the file
             with st.spinner("Extracting text from file..."):
-                resume_text = FileProcessor.process_file(uploaded_file)
+                resume_text = self.file_processor.process_file(uploaded_file)
             
             if resume_text:
                 # Send to LLM for structuring
@@ -202,8 +200,11 @@ class Sidebar:
         # Quick Stats Section
         st.sidebar.subheader("📈 Quick Stats")
         
+        job_count = self.mongo_handler.get_jobs_count()
+        if job_count is None:
+            job_count = 0
         # You can add more metrics here based on your session state
-        st.sidebar.metric("Total Jobs", "3")  # Replace with actual count
+        st.sidebar.metric("Total Jobs", job_count)  # Replace with actual count
         
         if st.session_state.resume_data:
             skills_count = len(st.session_state.resume_data.get('skills', []))

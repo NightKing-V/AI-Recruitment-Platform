@@ -2,7 +2,7 @@ import streamlit as st
 from typing import Dict, Any, Optional
 from .LLMFactory import LLMFactory
 from .clients.GroqClient import GroqClient
-from .prompts import PromptTemplates
+from .prompts.PromptTemplates import PromptTemplates
 from services.ResponseHandler import ResponseHandler
 
 

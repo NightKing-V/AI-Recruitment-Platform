@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional
+from typing import Dict, Type
 from langchain_core.language_models.llms import LLM
 from .LLMProvider import LLMProvider
 

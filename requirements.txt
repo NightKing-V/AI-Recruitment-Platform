@@ -8,9 +8,10 @@ tqdm
 numpy
 plotly
 
-# === Embeddings + Vector DB ===
+# === Embeddings + Vector DB + MongoDB ===
 pymongo[srv]
 qdrant-client
+huggingface_hub
 
 # === Doc Parsing ===
 PyMuPDF  # For extracting text from resumes

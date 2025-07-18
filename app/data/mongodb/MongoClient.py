@@ -91,10 +91,10 @@ class MongoDBHandler:
             logging.error(f"Error retrieving job: {e}")
             return None
     
-    def get_all_jobs(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_all_jobs(self) -> List[Dict[str, Any]]:
         """Get all jobs with optional limit"""
         try:
-            jobs = list(self.jobs_collection.find().limit(limit).sort("created_at", -1))
+            jobs = list(self.jobs_collection.find().sort("created_at", -1))
             
             # Convert ObjectId to string
             for job in jobs:

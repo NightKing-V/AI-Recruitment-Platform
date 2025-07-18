@@ -1,15 +1,14 @@
 import streamlit as st
 import json
+import logging
 from typing import Dict, Any, Optional, List
 
 class ResponseHandler:
     
     def _parse_llm_response(self, response) -> Optional[Any]:
         """Parse the LLM response and extract JSON data (handles AIMessage, dict, list, or string)."""
-        import json
 
         try:
-            st.write("Raw LLM response:", response)
 
             # Case 1: AIMessage (LangChain)
             if hasattr(response, "content"):
@@ -32,7 +31,6 @@ class ResponseHandler:
             # Case 4: String → parse JSON
             if isinstance(response, str):
                 parsed = json.loads(response)
-                st.write("Parsed outer JSON:", parsed)
 
                 if isinstance(parsed, list):
                     return parsed
@@ -48,12 +46,10 @@ class ResponseHandler:
             raise ValueError(f"Unsupported LLM response type: {type(response)}")
 
         except json.JSONDecodeError as e:
-            st.error(f"Failed to parse JSON from LLM response: {str(e)}")
-            st.text_area("Problematic JSON", str(response), height=300)
+            logging.error(f"JSON decode error: {e}")
             return None
         except Exception as e:
-            st.error(f"Error parsing LLM response: {str(e)}")
-            st.text_area("Raw LLM response", str(response), height=300)
+            logging.error(f"Error parsing LLM response: {e}")
             return None
 
 

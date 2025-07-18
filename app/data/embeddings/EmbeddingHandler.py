@@ -1,10 +1,9 @@
-import requests
-import json
+import os
 import numpy as np
+from huggingface_hub import InferenceClient
 from typing import List, Union, Optional
 import time
 import logging
-import os
 
 class EmbeddingHandler:
     
@@ -15,7 +14,6 @@ class EmbeddingHandler:
                  retry_delay: float = 1.0):
 
         # Get environment variables or use defaults
-        hf_url = os.getenv("HF_URL", "https://api-inference.huggingface.co/models")
         model_name = model_name or os.getenv("HF_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
         api_token = api_token or os.getenv("HF_API_KEY")
 
@@ -24,139 +22,46 @@ class EmbeddingHandler:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         
-        # Hugging Face Inference API endpoint
-        self.api_url = f"{hf_url}/{model_name}"
-        
-        # Set up headers
-        self.headers = {
-            "Content-Type": "application/json"
-        }
-        
-        if self.api_token:
-            self.headers["Authorization"] = f"Bearer {self.api_token}"
+        # Initialize HuggingFace Hub client
+        self.client = InferenceClient(api_key=self.api_token)
         
         # Set up logging
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         
         self.logger.warning(f"EmbeddingHandler initialized with model: {self.model_name}")
-        self.logger.warning(f"API URL: {self.api_url}")
     
-    def _make_request(self, texts: List[str]) -> List[List[float]]:
-        # For sentence-transformers models, use simple inputs format for feature extraction
-        # Remove the nested structure that might be causing the pipeline confusion
-        payload = {
-            "inputs": texts
-        }
-        
-        self.logger.info(f"Making embedding request for {len(texts)} texts")
-        self.logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
+    def _get_sentence_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """Get sentence embeddings by mean pooling token embeddings."""
+        self.logger.info(f"Getting embeddings for {len(texts)} texts")
         
         for attempt in range(self.max_retries):
             try:
-                response = requests.post(
-                    self.api_url,
-                    headers=self.headers,
-                    json=payload,
-                    timeout=30
-                )
+                # Get token-level embeddings
+                outputs = self.client.feature_extraction(texts, model=self.model_name)
+                arr = np.array(outputs)  # shape: (batch, tokens, dim) or (tokens, dim) for single
                 
-                self.logger.debug(f"Response status: {response.status_code}")
-                self.logger.debug(f"Response headers: {dict(response.headers)}")
+                # Ensure batch dimension
+                if arr.ndim == 2:  # single text: (tokens, dim)
+                    arr = arr[np.newaxis, ...]  # -> (1, tokens, dim)
                 
-                if response.status_code == 200:
-                    embeddings = response.json()
-                    
-                    # Handle different response formats
-                    if isinstance(embeddings, list):
-                        # Check if it's a list of lists (multiple embeddings)
-                        if len(embeddings) > 0:
-                            # If first element is a list, we have multiple embeddings
-                            if isinstance(embeddings[0], list):
-                                self.logger.info(f"Successfully got embeddings: {len(embeddings)} embeddings, each with {len(embeddings[0])} dimensions")
-                                return embeddings
-                            # If first element is a number, we have a single embedding
-                            elif isinstance(embeddings[0], (int, float)):
-                                self.logger.info(f"Successfully got single embedding with {len(embeddings)} dimensions")
-                                return [embeddings]  # Wrap in list for consistency
-                    
-                    self.logger.error(f"Unexpected response format: {type(embeddings)}")
-                    self.logger.error(f"Response preview: {str(embeddings)[:500]}")
-                    raise Exception(f"Unexpected response format from API")
-                    
-                elif response.status_code == 503:
-                    # Model is loading, wait and retry
-                    self.logger.warning(f"Model is loading, waiting {self.retry_delay} seconds...")
-                    time.sleep(self.retry_delay)
-                    continue
-                elif response.status_code == 400:
-                    # Bad request - try alternative payload format
-                    if attempt == 0:
-                        self.logger.warning("First attempt failed, trying alternative payload format...")
-                        # Try with explicit task specification
-                        payload = {
-                            "inputs": texts,
-                            "parameters": {
-                                "task": "feature-extraction"
-                            }
-                        }
-                        response = requests.post(
-                            self.api_url,
-                            headers=self.headers,
-                            json=payload,
-                            timeout=30
-                        )
-                        
-                        if response.status_code == 200:
-                            embeddings = response.json()
-                            if isinstance(embeddings, list) and len(embeddings) > 0:
-                                if isinstance(embeddings[0], list):
-                                    self.logger.info(f"Successfully got embeddings with alternative format: {len(embeddings)} embeddings")
-                                    return embeddings
-                                elif isinstance(embeddings[0], (int, float)):
-                                    return [embeddings]
-                        
-                        # If that didn't work, try one more format
-                        self.logger.warning("Alternative format failed, trying feature-extraction endpoint...")
-                        alt_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{self.model_name}"
-                        response = requests.post(
-                            alt_url,
-                            headers=self.headers,
-                            json={"inputs": texts},
-                            timeout=30
-                        )
-                        
-                        if response.status_code == 200:
-                            embeddings = response.json()
-                            if isinstance(embeddings, list) and len(embeddings) > 0:
-                                if isinstance(embeddings[0], list):
-                                    self.logger.info(f"Successfully got embeddings with feature-extraction endpoint: {len(embeddings)} embeddings")
-                                    return embeddings
-                                elif isinstance(embeddings[0], (int, float)):
-                                    return [embeddings]
-                    
-                    # If all attempts failed, log the error
-                    error_text = response.text
-                    self.logger.error(f"Bad request (400): {error_text}")
-                    self.logger.error(f"Request payload was: {json.dumps(payload, indent=2)}")
-                    raise Exception(f"API request failed: {response.status_code} - {error_text}")
-                else:
-                    self.logger.error(f"API request failed with status {response.status_code}: {response.text}")
-                    if attempt < self.max_retries - 1:
-                        time.sleep(self.retry_delay)
-                        continue
-                    else:
-                        raise Exception(f"API request failed: {response.status_code} - {response.text}")
-                        
-            except requests.exceptions.RequestException as e:
-                self.logger.error(f"Request exception: {e}")
+                # Mean pool over tokens axis
+                sentence_embeddings = arr.mean(axis=1)  # -> (batch, dim)
+                
+                # Convert to list of lists
+                embeddings = sentence_embeddings.tolist()
+                
+                self.logger.info(f"Successfully got embeddings: {len(embeddings)} embeddings, each with {len(embeddings[0])} dimensions")
+                return embeddings
+                
+            except Exception as e:
+                self.logger.error(f"Attempt {attempt + 1} failed: {e}")
                 if attempt < self.max_retries - 1:
+                    self.logger.warning(f"Retrying in {self.retry_delay} seconds...")
                     time.sleep(self.retry_delay)
                     continue
                 else:
-                    raise
-        
-        raise Exception(f"Failed to get embeddings after {self.max_retries} attempts")
+                    raise Exception(f"Failed to get embeddings after {self.max_retries} attempts: {e}")
     
     def get_embeddings(self, texts: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
         """Get embeddings for text(s). Can handle single string or list of strings."""
@@ -178,7 +83,7 @@ class EmbeddingHandler:
                 raise ValueError("No valid non-empty texts provided")
             
             # Make API request
-            embeddings = self._make_request(texts)
+            embeddings = self._get_sentence_embeddings(texts)
             
             # Return single embedding if single input was provided
             if return_single:
@@ -198,7 +103,9 @@ class EmbeddingHandler:
         try:
             self.logger.info(f"Getting embeddings for {len(jobs)} jobs")
             
-            embeddings = []
+            job_texts = []
+            valid_jobs = []
+            
             for i, job in enumerate(jobs):
                 self.logger.info(f"Processing job {i+1}/{len(jobs)}: {job.get('job_title', 'No title')}")
                 
@@ -255,20 +162,18 @@ class EmbeddingHandler:
                 self.logger.info(f"Job {i+1} text length: {len(full_text)} characters")
                 self.logger.debug(f"Job {i+1} text preview: {full_text[:200]}...")
                 
-                # Get embedding for this job
-                try:
-                    embedding = self.get_embeddings(full_text)
-                    embeddings.append(embedding)
-                    self.logger.info(f"Generated embedding for job {i+1}: {len(embedding)} dimensions")
-                except Exception as e:
-                    self.logger.error(f"Failed to generate embedding for job {i+1}: {e}")
-                    raise Exception(f"Error generating embedding for job {i+1}: {e}")
+                job_texts.append(full_text)
+                valid_jobs.append(i+1)
                 
-            if not embeddings:
-                raise Exception("No valid embeddings generated")
-                
+            if not job_texts:
+                raise Exception("No valid jobs with meaningful text content found")
+            
+            # Get embeddings for all jobs at once
+            embeddings = self._get_sentence_embeddings(job_texts)
+            
             self.logger.info(f"Generated embeddings for {len(embeddings)} jobs")
             return embeddings
+            
         except Exception as e:
             self.logger.error(f"Error getting job embeddings: {e}")
             raise e
@@ -349,4 +254,4 @@ class EmbeddingHandler:
 
         except Exception as e:
             self.logger.error(f"Error getting resume embedding: {e}")
-            raise ey
+            raise e

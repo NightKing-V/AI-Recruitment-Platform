@@ -12,7 +12,7 @@ class QdrantHandler:
     def __init__(self, collection_name: str = "jobs"):
         self.client = None
         self.collection_name = collection_name
-        self.vector_size = 1024  # Groq embedding size (e.g., llama-3-8b)
+        self.vector_size = 384  # Groq embedding size (e.g., llama-3-8b)
         self.logger = logging.getLogger(__name__)
         self.connect()
     
@@ -197,7 +197,6 @@ class QdrantHandler:
         try:
             info = self.client.get_collection(self.collection_name)
             return {
-                "name": info.name,
                 "points_count": info.points_count,
                 "vectors_count": info.vectors_count,
                 "status": info.status

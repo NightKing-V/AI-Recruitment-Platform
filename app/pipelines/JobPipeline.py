@@ -28,6 +28,11 @@ class JobPipeline:
             job_count = len(jobs)
             self.logger.info(f"Starting job pipeline for {job_count} job(s)")
 
+            # DEBUG: Print first job structure
+            if jobs:
+                self.logger.info(f"DEBUG: First job keys: {list(jobs[0].keys())}")
+                self.logger.info(f"DEBUG: First job sample: {dict(list(jobs[0].items())[:3])}")
+
             # Validate jobs data
             if not jobs or job_count == 0:
                 self.logger.error("No jobs provided")
@@ -54,6 +59,9 @@ class JobPipeline:
                 try:
                     self.logger.info(f"Processing job {i+1}/{job_count}: {job.get('job_title', 'No title')}")
                     
+                    # DEBUG: Check job structure before embedding
+                    self.logger.info(f"DEBUG: Job {i+1} keys: {list(job.keys())}")
+                    
                     # Pass single job as a list (since get_job_embeddings expects List[dict])
                     # and get back a list with one embedding
                     job_embeddings = self.embedding_handler.get_job_embeddings([job])
@@ -63,6 +71,9 @@ class JobPipeline:
                         embedding = job_embeddings[0]
                         embeddings.append(embedding)
                         self.logger.info(f"✓ Generated embedding for job {i+1}/{job_count} - dimension: {len(embedding)}")
+                        
+                        # DEBUG: Check embedding type and first few values
+                        self.logger.info(f"DEBUG: Embedding type: {type(embedding)}, first 3 values: {embedding[:3]}")
                     else:
                         self.logger.error(f"✗ Failed to generate embedding for job {i+1}/{job_count}")
                         # Add None to maintain alignment
@@ -87,13 +98,6 @@ class JobPipeline:
 
             self.logger.info(f"Generated {len(valid_data)} valid embeddings out of {job_count} jobs")
 
-            if not embeddings:
-                self.logger.error("Failed to generate any embeddings")
-                return {"success": False, "error": "Failed to generate embeddings"}
-
-            if len(embeddings) != len(job_ids):
-                self.logger.warning(f"Mismatch: {len(embeddings)} embeddings vs {len(job_ids)} job IDs")
-
             # Step 3: Store vectors in Qdrant
             self.logger.info("Storing vectors in Qdrant...")
             vector_results = []
@@ -103,6 +107,17 @@ class JobPipeline:
             for i, (job, embedding, job_id) in enumerate(valid_data):
                 try:
                     self.logger.info(f"Storing vector for job {i+1}/{len(valid_data)}: {job.get('job_title', 'No title')} (ID: {job_id})")
+                    
+                    # DEBUG: Check data before storing
+                    self.logger.info(f"DEBUG: Job ID type: {type(job_id)}, value: {job_id}")
+                    self.logger.info(f"DEBUG: Embedding type: {type(embedding)}, length: {len(embedding)}")
+                    self.logger.info(f"DEBUG: Job data keys: {list(job.keys())}")
+                    
+                    # Check if vector handler is properly initialized
+                    if self.vector_handler.client is None:
+                        self.logger.error("Vector handler client is None - connection failed")
+                        vector_results.append(False)
+                        continue
                     
                     success = self.vector_handler.store_job_vector(
                         job_data=job,
@@ -120,10 +135,19 @@ class JobPipeline:
 
                 except Exception as e:
                     self.logger.error(f"✗ Error storing vector for job {i+1}: {e}")
+                    import traceback
+                    self.logger.error(f"Traceback: {traceback.format_exc()}")
                     vector_results.append(False)
 
             successful_vectors = sum(vector_results)
             self.logger.info(f"Successfully stored {successful_vectors}/{len(valid_data)} vectors")
+
+            # DEBUG: Check Qdrant collection status after storing
+            try:
+                collection_info = self.vector_handler.get_collection_info()
+                self.logger.info(f"DEBUG: Collection info after storing: {collection_info}")
+            except Exception as e:
+                self.logger.error(f"DEBUG: Failed to get collection info: {e}")
 
             # Final validation - check if any jobs were actually stored
             if successful_vectors == 0:

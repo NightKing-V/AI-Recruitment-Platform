@@ -35,15 +35,6 @@ class LLMFactory:
     def get_llm(cls, provider_name: str) -> LLM:
         provider = cls.get_provider(provider_name)
         return provider.get_llm()
-    
-    @classmethod
-    def reset_provider(cls, provider_name: str):
-        provider_name = provider_name.lower()
-        if provider_name in cls._instances:
-            provider = cls._instances[provider_name]
-            if hasattr(provider, 'reset_llm'):
-                provider.reset_llm()
-            del cls._instances[provider_name]
 
 """
 # to Register default providers

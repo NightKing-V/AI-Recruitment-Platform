@@ -1,15 +1,5 @@
 import streamlit as st
 import time
-import fitz  # PyMuPDF
-import docx
-import io
-import requests
-import json
-from typing import Dict, Any, Optional
-
-from services.FileProcessor import FileProcessor
-from llm.LLMProcessor import LLMProcessor
-
 
 
 class Sidebar:
@@ -19,8 +9,6 @@ class Sidebar:
             st.session_state.resume_data = None
         if 'uploaded_file' not in st.session_state:
             st.session_state.uploaded_file = None
-        if 'processing' not in st.session_state:
-            st.session_state.processing = False
         
         st.sidebar.markdown("""
         <style>
@@ -78,53 +66,8 @@ class Sidebar:
             .css-1lcbmhc {
                 margin-bottom: 0.5rem !important;
             }
-            
-            /* Processing animation */
-            .processing {
-                color: #ff6b6b;
-                animation: pulse 1s infinite;
-            }
-            
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.5; }
-                100% { opacity: 1; }
-            }
         </style>
         """, unsafe_allow_html=True)
-    
-    def process_uploaded_file(self, uploaded_file):
-        """Process the uploaded file and extract structured data"""
-        if uploaded_file is None:
-            return
-        
-        # Check if this is a new file
-        if (st.session_state.uploaded_file is None or 
-            st.session_state.uploaded_file.name != uploaded_file.name):
-            
-            st.session_state.processing = True
-            st.sidebar.info("🔄 Processing your resume...")
-            
-            # Extract text from the file
-            with st.spinner("Extracting text from file..."):
-                resume_text = FileProcessor.process_file(uploaded_file)
-            
-            if resume_text:
-                # Send to LLM for structuring
-                with st.spinner("Analyzing resume with AI..."):
-                    structured_data = LLMProcessor.structure_resume_data(resume_text)
-                
-                if structured_data:
-                    st.session_state.resume_data = structured_data
-                    st.session_state.uploaded_file = uploaded_file
-                    st.sidebar.success("✅ Resume processed successfully!")
-                    st.rerun()
-                else:
-                    st.sidebar.error("❌ Failed to process resume")
-            else:
-                st.sidebar.error("❌ Failed to extract text from file")
-            
-            st.session_state.processing = False
             
     def render(self):
         
@@ -142,14 +85,8 @@ class Sidebar:
                 help="Supported formats: PDF, DOCX, TXT",
                 key="sidebar_file_upload"
             )
-            
-            # Process the file if uploaded
-            if uploaded_file is not None:
-                self.process_uploaded_file(uploaded_file)
         
-        # Show processing status
-        if st.session_state.processing:
-            st.sidebar.markdown('<div class="processing">🔄 Processing...</div>', unsafe_allow_html=True)
+        
         
         st.sidebar.markdown('<hr style="margin: 0.5rem 0;">', unsafe_allow_html=True)
         
@@ -162,28 +99,25 @@ class Sidebar:
             # Quick info display
             st.sidebar.markdown(f"""
             <div class="resume-info">
-                <strong>👤 {resume.get('name', 'Unknown')}</strong><br>
-                <small>📧 {resume.get('email', 'No email')}</small><br>
-                <small>📞 {resume.get('phone', 'No phone')}</small>
+                <strong>👤 {resume['name']}</strong><br>
+                <small>📧 {resume['email']}</small><br>
+                <small>📞 {resume['phone']}</small>
             </div>
             """, unsafe_allow_html=True)
             
             # Skills preview
-            if resume.get('skills'):
-                st.sidebar.write("**🔧 Top Skills:**")
-                top_skills = resume['skills'][:4]  # Show first 4 skills
-                skills_html = " ".join([f'<span class="skill-tag-sidebar">{skill}</span>' for skill in top_skills])
-                if len(resume['skills']) > 4:
-                    skills_html += f'<span class="skill-tag-sidebar">+{len(resume["skills"]) - 4} more</span>'
-                st.sidebar.markdown(skills_html, unsafe_allow_html=True)
+            st.sidebar.write("**🔧 Top Skills:**")
+            top_skills = resume['skills'][:4]  # Show first 4 skills
+            skills_html = " ".join([f'<span class="skill-tag-sidebar">{skill}</span>' for skill in top_skills])
+            if len(resume['skills']) > 4:
+                skills_html += f'<span class="skill-tag-sidebar">+{len(resume["skills"]) - 4} more</span>'
+            st.sidebar.markdown(skills_html, unsafe_allow_html=True)
             
             # Experience count
-            experience_count = len(resume.get('experience', []))
-            st.sidebar.metric("💼 Experience", f"{experience_count} positions")
+            st.sidebar.metric("💼 Experience", f"{len(resume['experience'])} positions")
             
             # Education count
-            education_count = len(resume.get('education', []))
-            st.sidebar.metric("🎓 Education", f"{education_count} degrees")
+            st.sidebar.metric("🎓 Education", f"{len(resume['education'])} degrees")
             
             # Clear resume button
             if st.sidebar.button("🗑️ Clear Resume", key="clear_resume"):
@@ -206,5 +140,4 @@ class Sidebar:
         st.sidebar.metric("Total Jobs", "3")  # Replace with actual count
         
         if st.session_state.resume_data:
-            skills_count = len(st.session_state.resume_data.get('skills', []))
-            st.sidebar.metric("Skills Count", skills_count)
+            st.sidebar.metric("Skills Count", len(st.session_state.resume_data['skills']))

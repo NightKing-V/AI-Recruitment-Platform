@@ -56,18 +56,6 @@ class GroqClient(LLMProvider):
             self._llm_instance = self.create_llm()
         return self._llm_instance
     
-    def reset_llm(self):
-        self._llm_instance = None
-    
-    def update_config(self, **kwargs):
-        if 'model' in kwargs:
-            self._default_model = kwargs['model']
-        if 'temperature' in kwargs:
-            self._default_temperature = kwargs['temperature']
-        if 'max_tokens' in kwargs:
-            self._default_max_tokens = kwargs['max_tokens']
-        self.reset_llm()
-    
     @property
     def current_config(self) -> Dict[str, Any]:
         return {

@@ -150,6 +150,9 @@ class EmbeddingHandler:
                     
                 if job.get("experience_level"):
                     text_parts.append(f"Experience Level: {job['experience_level']}")
+                
+                if job.get("company"):
+                    text_parts.append(f"Company: {job['company']}")
                     
                 if job.get("location"):
                     text_parts.append(f"Location: {job['location']}")

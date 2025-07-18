@@ -21,7 +21,7 @@ class jobHandler:
             return []
         
         try:
-            jobs = self.llm_processor.generate_job_description(job_num, job_domains)
+            jobs = self.llm_processor.job_description_generator(job_num, job_domains)
             if not jobs:
                 st.error("No job descriptions generated")
                 return []

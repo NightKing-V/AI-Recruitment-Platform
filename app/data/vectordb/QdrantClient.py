@@ -95,7 +95,7 @@ class QdrantHandler:
                         "location": jd.get("location", ""),
                         "department": jd.get("department", ""),
                         "experience_level": jd.get("experience_level", ""),
-                        "job_type": jd.get("job_type", ""),
+                        "employment_type": jd.get("employment_type", ""),
                         "required_skills": jd.get("required_skills", []),
                         "salary_range": jd.get("salary_range", ""),
                         "description": jd.get("description", ""),

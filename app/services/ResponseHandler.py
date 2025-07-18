@@ -4,45 +4,58 @@ from typing import Dict, Any, Optional, List
 
 class ResponseHandler:
     
-    def _parse_llm_response(self, response: str) -> Optional[Any]:
-        """Parse the LLM response and extract JSON data (object or list)"""
+    def _parse_llm_response(self, response) -> Optional[Any]:
+        """Parse the LLM response and extract JSON data (handles AIMessage, dict, list, or string)."""
+        import json
+
         try:
-            cleaned_response = response.strip()
+            st.write("Raw LLM response:", response)
 
-            # Remove markdown code blocks if present
-            if cleaned_response.startswith('```json'):
-                cleaned_response = cleaned_response[7:]
-            elif cleaned_response.startswith('```'):
-                cleaned_response = cleaned_response[3:]
+            # Case 1: AIMessage (LangChain)
+            if hasattr(response, "content"):
+                response = response.content
 
-            if cleaned_response.endswith('```'):
-                cleaned_response = cleaned_response[:-3]
+            # Case 2: Already a Python list
+            if isinstance(response, list):
+                return response
 
-            # Extract JSON substring: look for either {..} or [..]
-            start_idx = cleaned_response.find('{')
-            start_idx_list = cleaned_response.find('[')
+            # Case 3: Already a Python dict (may have 'content')
+            if isinstance(response, dict):
+                content = response.get("content")
+                if content is None:
+                    return response  # already structured job data
+                if isinstance(content, list):
+                    return content
+                if isinstance(content, str):
+                    return json.loads(content)
 
-            if start_idx_list != -1 and (start_idx_list < start_idx or start_idx == -1):
-                # It's a list
-                start_idx = start_idx_list
-                end_idx = cleaned_response.rfind(']')
-            else:
-                # It's a single object
-                end_idx = cleaned_response.rfind('}')
+            # Case 4: String → parse JSON
+            if isinstance(response, str):
+                parsed = json.loads(response)
+                st.write("Parsed outer JSON:", parsed)
 
-            if start_idx != -1 and end_idx != -1:
-                json_str = cleaned_response[start_idx:end_idx + 1]
-                parsed_data = json.loads(json_str)
-                return parsed_data  # could be dict or list
-            else:
-                raise ValueError("No valid JSON found in response")
+                if isinstance(parsed, list):
+                    return parsed
+
+                if isinstance(parsed, dict):
+                    content = parsed.get("content")
+                    if isinstance(content, list):
+                        return content
+                    if isinstance(content, str):
+                        return json.loads(content)
+                    return parsed
+
+            raise ValueError(f"Unsupported LLM response type: {type(response)}")
 
         except json.JSONDecodeError as e:
             st.error(f"Failed to parse JSON from LLM response: {str(e)}")
+            st.text_area("Problematic JSON", str(response), height=300)
             return None
         except Exception as e:
             st.error(f"Error parsing LLM response: {str(e)}")
+            st.text_area("Raw LLM response", str(response), height=300)
             return None
+
 
     
     def _validate_and_clean_resume(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -92,7 +105,7 @@ class ResponseHandler:
         return data
     
     
-    def _validate_and_clean_data(self, data: Any) -> List[Dict[str, Any]]:
+    def _validate_and_clean_jd(self, data: Any) -> List[Dict[str, Any]]:
         """Validate and clean a list of job descriptions"""
         default_structure = {
             "job_title": "",
@@ -102,6 +115,7 @@ class ResponseHandler:
             "required_skills": [],
             "qualifications": [],
             "experience_level": "",
+            "company": "",
             "location": "",
             "employment_type": ""
         }

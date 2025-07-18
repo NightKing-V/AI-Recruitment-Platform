@@ -1,4 +1,3 @@
-from services.JobHandler import jobHandler
 from data.mongodb.MongoClient import MongoDBHandler
 from data.embeddings.EmbeddingHandler import EmbeddingHandler
 from data.vectordb.QdrantClient import QdrantHandler
@@ -8,7 +7,6 @@ from typing import List, Dict, Any, Optional, Union
 
 class JobPipeline:
     def __init__(self):
-        self.job_handler = jobHandler()
         self.mongo_handler = MongoDBHandler()
         self.embedding_handler = EmbeddingHandler()
         self.vector_handler = QdrantHandler()

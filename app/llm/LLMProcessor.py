@@ -78,7 +78,7 @@ class LLMProcessor:
             response = self.llm.invoke(prompt)
             
             parsed_data = self.response_handler._parse_llm_response(response)
-            structured_data = self.response_handler._validate_and_clean_data(parsed_data)
+            structured_data = self.response_handler._validate_and_clean_jd(parsed_data)
             
             return structured_data
 

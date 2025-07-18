@@ -38,7 +38,8 @@ class JobManagementPage:
                     )
                 
                 with col2:
-                    jobs_per_domain = st.slider("Jobs per Domain", 1, 50, 10)
+                    jobs_per_domain = st.slider("Jobs per Domain", 1, 10, 2)
+                    st.write(f"Generating {jobs_per_domain} jobs for each selected domain")
                 
                 if st.button("🚀 Generate Job Descriptions", key="generate_jobs"):
                     if selected_domains:
@@ -74,7 +75,7 @@ class JobManagementPage:
                         with st.spinner("Processing job description..."):
                             time.sleep(2)
                             
-                            self.job_handler.process_job_description(job_text.strip())
+                            self.job_handler.create_job(job_text.strip())
                             
                             st.success("✅ Job description processed!")
                             st.balloons()
@@ -100,14 +101,13 @@ class JobManagementPage:
                     
                     # Display jobs
                     for job in filtered_jobs:
-                        with st.expander(f"📋 {job['title']} at {job['company']}"):
+                        with st.expander(f"📋 {job['job_title']} at {job['company']}"):
                             col1, col2 = st.columns(2)
                             
                             with col1:
                                 st.write(f"**Location:** {job['location']}")
                                 st.write(f"**Experience:** {job['experience_level']}")
-                                st.write(f"**Job Type:** {job['job_type']}")
-                                st.write(f"**Department:** {job['department']}")
+                                st.write(f"**Employment Type:** {job['employment_type']}")
                                 if job.get('salary_range'):
                                     st.write(f"**Salary:** {job['salary_range']}")
                             
@@ -117,6 +117,6 @@ class JobManagementPage:
                                 st.markdown(skills_html, unsafe_allow_html=True)
                             
                             st.write("**Description:**")
-                            st.write(job['description'])
+                            st.write(job['summary'])
                 else:
                     st.info("No jobs found. Generate or Create some jobs first!")

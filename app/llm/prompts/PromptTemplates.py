@@ -64,45 +64,33 @@ class PromptTemplates:
     def job_generator_prompt(job_num, job_domains: list[str]) -> str:
         domains_str = ", ".join(job_domains)
         prompt = f"""
-        You are an expert job description writer. Generate highly realistic and detailed job descriptions for the following domains:
-        {domains_str}
+    You are an expert job description writer.
 
-        IMPORTANT INSTRUCTIONS:
-        1. Return ONLY valid JSON, no additional text or explanation.
-        2. Generate {job_num} unique job description/s for each domain listed.
-        3. Use varied job titles relevant to each domain.
-        4. Keep language professional, concise, and recruiter-friendly.
-        5. Include all key details that a recruiter would expect.
+    STRICT INSTRUCTIONS:
+    - Output ONLY a JSON array (no headings, no explanations, no markdown, no extra fields).
+    - Do NOT include any text outside the JSON.
+    - Generate {job_num} unique, detailed job descriptions for each of these domains: {domains_str}.
 
-        Required JSON structure (return as an array):
-        [
-            {{
-                "job_title": "Job Title",
-                "job_domain": "Job Domain",
-                "summary": "Brief overview of the role",
-                "responsibilities": [
-                    "Responsibility 1",
-                    "Responsibility 2",
-                    "Responsibility 3"
-                ],
-                "required_skills": [
-                    "Skill 1",
-                    "Skill 2",
-                    "Skill 3"
-                ],
-                "qualifications": [
-                    "Qualification 1",
-                    "Qualification 2"
-                ],
-                "experience_level": "e.g., Entry-level / Mid-level / Senior",
-                "location": "City, State/Country",
-                "employment_type": "Full-time / Part-time / Contract"
-            }}
-        ]
+    Each job object must have:
+    [
+        {{
+            "job_title": "Job Title",
+            "job_domain": "Job Domain",
+            "summary": "Brief overview of the role",
+            "responsibilities": ["Responsibility 1", "Responsibility 2", "Responsibility 3"],
+            "required_skills": ["Skill 1", "Skill 2", "Skill 3"],
+            "qualifications": ["Qualification 1", "Qualification 2"],
+            "experience_level": "Entry-level / Mid-level / Senior",
+            "company": "Company Name",
+            "location": "City, Country",
+            "employment_type": "Full-time / Part-time / Contract"
+        }}
+    ]
 
-        Return only the JSON array:
-        """
+    Now output ONLY the JSON array:
+    """
         return prompt
+
     
     @staticmethod
     def job_extraction_prompt(job_description_text: str) -> str:

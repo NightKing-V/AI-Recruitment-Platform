@@ -1,0 +1,160 @@
+import os
+import logging
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError
+from typing import Dict, List, Optional, Any
+from datetime import datetime
+import streamlit as st
+
+class MongoDBHandler:
+    """Handle MongoDB operations for job descriptions and resumes"""
+    
+    def __init__(self):
+        self.client = None
+        self.db = None
+        self.jobs_collection = None
+        self.resumes_collection = None
+        self.connect()
+    
+    def connect(self):
+        """Connect to MongoDB"""
+        try:
+            # Get MongoDB connection string from environment or Streamlit secrets
+            mongo_uri = os.getenv("MONGODB_URI") or st.secrets.get("MONGODB_URI")
+            
+            if not mongo_uri:
+                st.error("MongoDB URI not found. Please set MONGODB_URI in environment or secrets.")
+                return False
+            
+            self.client = MongoClient(mongo_uri)
+            self.db = self.client.recruitment_platform
+            self.jobs_collection = self.db.jobs
+            self.resumes_collection = self.db.resumes
+            
+            # Test connection
+            self.client.admin.command('ping')
+            logging.info("Successfully connected to MongoDB")
+            return True
+            
+        except PyMongoError as e:
+            logging.error(f"MongoDB connection error: {e}")
+            st.error(f"Failed to connect to MongoDB: {e}")
+            return False
+    
+    def store_jobs(self, jobs_data: Any) -> Optional[List[str]]:
+        """
+        Store one or multiple job descriptions in MongoDB.
+        Accepts either a single dict or a list of dicts.
+        Returns list of inserted IDs as strings, or None on failure.
+        """
+        try:
+            if isinstance(jobs_data, dict):
+                # Single job
+                jobs_data["created_at"] = datetime.now()
+                jobs_data["updated_at"] = datetime.now()
+                result = self.jobs_collection.insert_one(jobs_data)
+                logging.info(f"Job stored with ID: {result.inserted_id}")
+                return [str(result.inserted_id)]
+            elif isinstance(jobs_data, list):
+                # Multiple jobs
+                for job in jobs_data:
+                    job["created_at"] = datetime.now()
+                    job["updated_at"] = datetime.now()
+                result = self.jobs_collection.insert_many(jobs_data)
+                job_ids = [str(id) for id in result.inserted_ids]
+                logging.info(f"Stored {len(job_ids)} jobs")
+                return job_ids
+            else:
+                logging.error("Invalid input type for store_jobs. Must be dict or list of dicts.")
+                st.error("Invalid input type for store_jobs. Must be dict or list of dicts.")
+                return None
+        except PyMongoError as e:
+            logging.error(f"Error storing job(s): {e}")
+            st.error(f"Failed to store job(s): {e}")
+            return None
+    
+    def get_job_by_id(self, job_id: str) -> Optional[Dict[str, Any]]:
+        """Get job by ID"""
+        try:
+            from bson import ObjectId
+            job = self.jobs_collection.find_one({"_id": ObjectId(job_id)})
+            if job:
+                job["_id"] = str(job["_id"])
+            return job
+            
+        except (PyMongoError, Exception) as e:
+            logging.error(f"Error retrieving job: {e}")
+            return None
+    
+    def get_all_jobs(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get all jobs with optional limit"""
+        try:
+            jobs = list(self.jobs_collection.find().limit(limit).sort("created_at", -1))
+            
+            # Convert ObjectId to string
+            for job in jobs:
+                job["_id"] = str(job["_id"])
+            
+            return jobs
+            
+        except PyMongoError as e:
+            logging.error(f"Error retrieving jobs: {e}")
+            return []
+    
+    def search_jobs(self, query: Dict[str, Any], limit: int = 50) -> List[Dict[str, Any]]:
+        """Search jobs with filters"""
+        try:
+            jobs = list(self.jobs_collection.find(query).limit(limit).sort("created_at", -1))
+            
+            # Convert ObjectId to string
+            for job in jobs:
+                job["_id"] = str(job["_id"])
+            
+            return jobs
+            
+        except PyMongoError as e:
+            logging.error(f"Error searching jobs: {e}")
+            return []
+    
+    def delete_job(self, job_id: str) -> bool:
+        """Delete job by ID"""
+        try:
+            from bson import ObjectId
+            result = self.jobs_collection.delete_one({"_id": ObjectId(job_id)})
+            return result.deleted_count > 0
+            
+        except (PyMongoError, Exception) as e:
+            logging.error(f"Error deleting job: {e}")
+            return False
+    
+    def store_resume(self, resume_data: Dict[str, Any]) -> Optional[str]:
+        """Store resume in MongoDB"""
+        try:
+            # Add metadata
+            resume_data["created_at"] = datetime.now()
+            resume_data["updated_at"] = datetime.now()
+            
+            # Insert resume
+            result = self.resumes_collection.insert_one(resume_data)
+            
+            logging.info(f"Resume stored with ID: {result.inserted_id}")
+            return str(result.inserted_id)
+            
+        except PyMongoError as e:
+            logging.error(f"Error storing resume: {e}")
+            st.error(f"Failed to store resume: {e}")
+            return None
+    
+    def get_jobs_count(self) -> int:
+        """Get total number of jobs"""
+        try:
+            return self.jobs_collection.count_documents({})
+        except PyMongoError as e:
+            logging.error(f"Error counting jobs: {e}")
+            return 0
+
+    def close_connection(self):
+        """Close MongoDB connection"""
+        if self.client:
+            self.client.close()
+            logging.info("MongoDB connection closed")

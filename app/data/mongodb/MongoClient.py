@@ -21,15 +21,18 @@ class MongoDBHandler:
         try:
             # Get MongoDB connection string from environment or Streamlit secrets
             mongo_uri = os.getenv("MONGODB_URI") or st.secrets.get("MONGODB_URI")
-            
+            db_name = os.getenv("MONGODB_DB") or st.secrets.get("MONGODB_DB") or "recruitment_platform"
+            jobs_collection_name = os.getenv("MONGODB_JOBS_COLLECTION") or st.secrets.get("MONGODB_JOBS_COLLECTION") or "jobs"
+            resumes_collection_name = os.getenv("MONGODB_RESUMES_COLLECTION") or st.secrets.get("MONGODB_RESUMES_COLLECTION") or "resumes"
+
             if not mongo_uri:
                 st.error("MongoDB URI not found. Please set MONGODB_URI in environment or secrets.")
                 return False
-            
+
             self.client = MongoClient(mongo_uri)
-            self.db = self.client.recruitment_platform
-            self.jobs_collection = self.db.jobs
-            self.resumes_collection = self.db.resumes
+            self.db = self.client[db_name]
+            self.jobs_collection = self.db[jobs_collection_name]
+            self.resumes_collection = self.db[resumes_collection_name]
             
             # Test connection
             self.client.admin.command('ping')

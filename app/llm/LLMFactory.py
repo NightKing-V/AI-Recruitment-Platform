@@ -1,7 +1,6 @@
 from typing import Dict, Type, Optional
 from langchain_core.language_models.llms import LLM
 from .LLMProvider import LLMProvider
-from .clients.GroqClient import GroqClient
 
 
 class LLMFactory:
@@ -11,7 +10,11 @@ class LLMFactory:
     
     @classmethod
     def register_provider(cls, provider_name: str, provider_class: Type[LLMProvider]):
-        cls._providers[provider_name.lower()] = provider_class
+        provider_name = provider_name.lower()
+        if provider_name in cls._providers:
+            cls._providers[provider_name] = provider_class
+        else:
+            cls._providers[provider_name] = provider_class
     
     @classmethod
     def get_provider(cls, provider_name: str) -> LLMProvider:

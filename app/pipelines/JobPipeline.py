@@ -19,4 +19,4 @@ class JobPipeline:
         )
         
         job_ids = self.mongo_handler.store_jobs(jobs)
-        self.embedding_handler.create_embeddings(jobs)
+        self.embedding_handler.get_embeddings(jobs)

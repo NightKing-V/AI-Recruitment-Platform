@@ -12,7 +12,7 @@ class QdrantHandler:
     def __init__(self, collection_name: str = "jobs"):
         self.client = None
         self.collection_name = collection_name
-        self.vector_size = 1536  # OpenAI embedding size
+        self.vector_size = 4096  # Groq embedding size (e.g., llama-3-8b)
         self.connect()
     
     def connect(self):
@@ -66,138 +66,83 @@ class QdrantHandler:
     
     def store_job_vector(self, job_data: Dict[str, Any], embedding: List[float], job_id: str) -> bool:
         """Store job vector in Qdrant"""
-        try:
-            # Create point with vector and metadata
-            point = PointStruct(
-                id=str(uuid.uuid4()),
-                vector=embedding,
-                payload={
-                    "job_id": job_id,
-                    "title": job_data.get("title", ""),
-                    "company": job_data.get("company", ""),
-                    "location": job_data.get("location", ""),
-                    "department": job_data.get("department", ""),
-                    "experience_level": job_data.get("experience_level", ""),
-                    "job_type": job_data.get("job_type", ""),
-                    "required_skills": job_data.get("required_skills", []),
-                    "salary_range": job_data.get("salary_range", ""),
-                    "description": job_data.get("description", ""),
-                    "summary": job_data.get("summary", ""),
-                    "created_at": str(job_data.get("created_at", "")),
-                }
-            )
-            
-            # Upload point
-            self.client.upsert(
-                collection_name=self.collection_name,
-                points=[point]
-            )
-            
-            logging.info(f"Stored vector for job: {job_data.get('title', 'Unknown')}")
-            return True
-            
-        except Exception as e:
-            logging.error(f"Error storing job vector: {e}")
-            return False
-    
-    def store_multiple_job_vectors(self, jobs_data: List[Dict[str, Any]], embeddings: List[List[float]], job_ids: List[str]) -> int:
-        """Store multiple job vectors in Qdrant"""
+        # Unified function to store one or multiple job vectors
+        if not isinstance(job_data, list):
+            jobs_data = [job_data]
+            embeddings = [embedding]
+            job_ids = [job_id]
+        else:
+            jobs_data = job_data
+            embeddings = embedding
+            job_ids = job_id
+
         try:
             points = []
-            
-            for job_data, embedding, job_id in zip(jobs_data, embeddings, job_ids):
+            for jd, emb, jid in zip(jobs_data, embeddings, job_ids):
                 point = PointStruct(
                     id=str(uuid.uuid4()),
-                    vector=embedding,
+                    vector=emb,
                     payload={
-                        "job_id": job_id,
-                        "title": job_data.get("title", ""),
-                        "company": job_data.get("company", ""),
-                        "location": job_data.get("location", ""),
-                        "department": job_data.get("department", ""),
-                        "experience_level": job_data.get("experience_level", ""),
-                        "job_type": job_data.get("job_type", ""),
-                        "required_skills": job_data.get("required_skills", []),
-                        "salary_range": job_data.get("salary_range", ""),
-                        "description": job_data.get("description", ""),
-                        "summary": job_data.get("summary", ""),
-                        "created_at": str(job_data.get("created_at", "")),
+                    "job_id": jid,
+                    "title": jd.get("title", ""),
+                    "company": jd.get("company", ""),
+                    "location": jd.get("location", ""),
+                    "department": jd.get("department", ""),
+                    "experience_level": jd.get("experience_level", ""),
+                    "job_type": jd.get("job_type", ""),
+                    "required_skills": jd.get("required_skills", []),
+                    "salary_range": jd.get("salary_range", ""),
+                    "description": jd.get("description", ""),
+                    "summary": jd.get("summary", ""),
+                    "created_at": str(jd.get("created_at", "")),
                     }
                 )
-                points.append(point)
-            
-            # Upload all points
+            points.append(point)
             self.client.upsert(
-                collection_name=self.collection_name,
-                points=points
+            collection_name=self.collection_name,
+            points=points
             )
-            
             logging.info(f"Stored {len(points)} job vectors")
-            return len(points)
-            
+            return len(points) if len(points) > 1 else (len(points) == 1)
         except Exception as e:
-            logging.error(f"Error storing multiple job vectors: {e}")
+            logging.error(f"Error storing job vectors: {e}")
             return 0
     
-    def search_similar_jobs(self, query_vector: List[float], limit: int = 10, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Search for similar jobs using vector similarity"""
+    def search_similar_jobs(self, query_vector: List[float], limit: int = 10, filters: Optional[Dict[str, Any]] = None) -> List[str]:
+        """Search for similar jobs using vector similarity, returning only job IDs"""
         try:
-            # Prepare filters if provided
             query_filter = None
             if filters:
                 conditions = []
-                
                 if "department" in filters and filters["department"]:
                     conditions.append(FieldCondition(
                         key="department",
                         match=MatchValue(value=filters["department"])
                     ))
-                
                 if "experience_level" in filters and filters["experience_level"]:
                     conditions.append(FieldCondition(
                         key="experience_level",
                         match=MatchValue(value=filters["experience_level"])
                     ))
-                
                 if "location" in filters and filters["location"]:
                     conditions.append(FieldCondition(
                         key="location",
                         match=MatchValue(value=filters["location"])
                     ))
-                
                 if conditions:
                     query_filter = Filter(must=conditions)
-            
-            # Search for similar vectors
+
             search_results = self.client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
                 query_filter=query_filter,
                 limit=limit
             )
-            
-            # Format results
-            results = []
-            for result in search_results:
-                job_match = {
-                    "similarity_score": result.score,
-                    "job_id": result.payload.get("job_id"),
-                    "title": result.payload.get("title"),
-                    "company": result.payload.get("company"),
-                    "location": result.payload.get("location"),
-                    "department": result.payload.get("department"),
-                    "experience_level": result.payload.get("experience_level"),
-                    "job_type": result.payload.get("job_type"),
-                    "required_skills": result.payload.get("required_skills", []),
-                    "salary_range": result.payload.get("salary_range"),
-                    "description": result.payload.get("description"),
-                    "summary": result.payload.get("summary"),
-                }
-                results.append(job_match)
-            
-            logging.info(f"Found {len(results)} similar jobs")
-            return results
-            
+
+            job_ids = [result.payload.get("job_id") for result in search_results if result.payload.get("job_id")]
+            logging.info(f"Found {len(job_ids)} similar jobs")
+            return job_ids
+
         except Exception as e:
             logging.error(f"Error searching similar jobs: {e}")
             return []
@@ -237,6 +182,8 @@ class QdrantHandler:
         except Exception as e:
             logging.error(f"Error deleting job vector: {e}")
             return False
+    
+    
     
     def get_collection_info(self) -> Dict[str, Any]:
         """Get information about the collection"""

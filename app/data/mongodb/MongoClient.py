@@ -59,6 +59,7 @@ class MongoDBHandler:
                 result = self.jobs_collection.insert_one(jobs_data)
                 logging.info(f"Job stored with ID: {result.inserted_id}")
                 return [str(result.inserted_id)]
+            
             elif isinstance(jobs_data, list):
                 # Multiple jobs
                 for job in jobs_data:

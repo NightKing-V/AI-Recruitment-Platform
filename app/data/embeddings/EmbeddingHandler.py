@@ -83,7 +83,8 @@ class EmbeddingHandler:
         raise Exception(f"Failed to get embeddings after {self.max_retries} attempts")
     
     def get_embeddings(self, texts: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
-       try:
+        """Get embeddings for text(s). Can handle single string or list of strings."""
+        try:
             # Handle single string input
             if isinstance(texts, str):
                 texts = [texts]
@@ -103,7 +104,121 @@ class EmbeddingHandler:
                 return embeddings[0]
             
             return embeddings
-       except Exception as e:
+            
+        except Exception as e:
             self.logger.error(f"Error getting embeddings: {e}")
             raise e
-   
+    
+    def get_job_embeddings(self, jobs: List[dict]) -> List[List[float]]:
+        """
+        Get embeddings for job descriptions.
+        Creates one embedding per job using title, description, and required skills.
+        """
+        try:
+            embeddings = []
+            for job in jobs:
+                text_parts = []
+                if job.get("job_title"):
+                    text_parts.append(f"Title: {job['job_title']}")
+                    
+                if job.get("job_domain"):
+                    text_parts.append(f"Domain: {job['job_domain']}")
+                    
+                if job.get("summary"):
+                    text_parts.append(f"Summary: {job['summary']}")
+                    
+                if job.get("responsibilities"):
+                    if isinstance(job["responsibilities"], list):
+                        resp_text = "; ".join(job["responsibilities"])
+                    else:
+                        resp_text = str(job["responsibilities"])
+                    text_parts.append(f"Responsibilities: {resp_text}")
+                    
+                if job.get("required_skills"):
+                    if isinstance(job["required_skills"], list):
+                        skills_text = ", ".join(job["required_skills"])
+                    else:
+                        skills_text = str(job["required_skills"])
+                    text_parts.append(f"Required Skills: {skills_text}")
+                    
+                if job.get("qualifications"):
+                    if isinstance(job["qualifications"], list):
+                        qual_text = "; ".join(job["qualifications"])
+                    else:
+                        qual_text = str(job["qualifications"])
+                    text_parts.append(f"Qualifications: {qual_text}")
+                    
+                if job.get("experience_level"):
+                    text_parts.append(f"Experience Level: {job['experience_level']}")
+                    
+                if job.get("location"):
+                    text_parts.append(f"Location: {job['location']}")
+                    
+                if job.get("employment_type"):
+                    text_parts.append(f"Employment Type: {job['employment_type']}")
+                    
+                full_text = "\n".join(text_parts)
+                
+                # Get embedding for this job
+                embedding = self.get_embeddings(full_text)
+                embeddings.append(embedding)
+            self.logger.info(f"Generated embeddings for {len(jobs)} jobs")
+            return embeddings
+        except Exception as e:
+            self.logger.error(f"Error getting job embeddings: {e}")
+            raise e
+    
+    def get_resume_embedding(self, resume: dict) -> List[float]:
+        """
+        Get embedding for resume dict.
+        Combines fields from the default_structure into a single text for embedding.
+        """
+        try:
+            text_parts = []
+            if resume.get("name"):
+                text_parts.append(f"Name: {resume['name']}")
+            if resume.get("email"):
+                text_parts.append(f"Email: {resume['email']}")
+            if resume.get("phone"):
+                text_parts.append(f"Phone: {resume['phone']}")
+            if resume.get("location"):
+                text_parts.append(f"Location: {resume['location']}")
+            if resume.get("summary"):
+                text_parts.append(f"Summary: {resume['summary']}")
+            if resume.get("skills"):
+                skills_text = ", ".join(resume["skills"]) if isinstance(resume["skills"], list) else str(resume["skills"])
+                text_parts.append(f"Skills: {skills_text}")
+            if resume.get("experience"):
+                if isinstance(resume["experience"], list):
+                    exp_text = "; ".join([str(e) for e in resume["experience"]])
+                else:
+                    exp_text = str(resume["experience"])
+                text_parts.append(f"Experience: {exp_text}")
+            if resume.get("education"):
+                if isinstance(resume["education"], list):
+                    edu_text = "; ".join([str(e) for e in resume["education"]])
+                else:
+                    edu_text = str(resume["education"])
+                text_parts.append(f"Education: {edu_text}")
+            if resume.get("certifications"):
+                cert_text = ", ".join(resume["certifications"]) if isinstance(resume["certifications"], list) else str(resume["certifications"])
+                text_parts.append(f"Certifications: {cert_text}")
+            if resume.get("languages"):
+                lang_text = ", ".join(resume["languages"]) if isinstance(resume["languages"], list) else str(resume["languages"])
+                text_parts.append(f"Languages: {lang_text}")
+            if resume.get("projects"):
+                if isinstance(resume["projects"], list):
+                    proj_text = "; ".join([str(p) for p in resume["projects"]])
+                else:
+                    proj_text = str(resume["projects"])
+                text_parts.append(f"Projects: {proj_text}")
+
+            full_text = "\n".join(text_parts)
+            
+            embedding = self.get_embeddings(full_text)
+            self.logger.info("Generated embedding for resume")
+            return embedding
+
+        except Exception as e:
+            self.logger.error(f"Error getting resume embedding: {e}")
+            raise e

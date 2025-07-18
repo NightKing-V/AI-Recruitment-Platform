@@ -3,6 +3,7 @@ import json
 import streamlit as st
 
 from llm.LLMProcessor import LLMProcessor
+from pipelines.JobPipeline import JobPipeline
 
 
 class jobHandler:
@@ -10,8 +11,9 @@ class jobHandler:
     
     def __init__(self):
         self.llm_processor = LLMProcessor()
+        self.pipeline = JobPipeline()
         
-    def generate_job_descriptions(self, job_num: int, job_domains:List[str])-> List[Dict[str, Any]]:
+    def generate_job(self, job_num: int, job_domains:List[str])-> List[Dict[str, Any]]:
         
         # Generate job descriptions for given domains using LLM.
         
@@ -20,8 +22,12 @@ class jobHandler:
         
         try:
             jobs = self.llm_processor.generate_job_description(job_num, job_domains)
+            if not jobs:
+                st.error("No job descriptions generated")
+                return []
+            result = self.pipeline.job_pipeline(jobs)
             
-            return jobs
+            return result
         except Exception as e:
             st.error(f"Error generating job descriptions: {str(e)}")
             return []
@@ -37,10 +43,16 @@ class jobHandler:
         try:
             jobs = self.llm_processor.job_summary_generator(job_desc)
             
+            if not jobs:
+                st.error("No job descriptions generated")
+                return []
+            result = self.pipeline.job_pipeline(jobs)
+            
+            return result
             
         except json.JSONDecodeError as e:
             st.error(f"Invalid JSON format: {str(e)}")
             return None
         except Exception as e:
-            st.error(f"Error creating job: {str(e)}")
+            st.error(f"Error creating job summary: {str(e)}")
             return None

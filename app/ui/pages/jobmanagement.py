@@ -1,12 +1,14 @@
 import streamlit as st
 import time
 
-from pipelines.JobPipeline import JobPipeline
+from services.JobHandler import jobHandler
+from data.mongodb.MongoClient import MongoDBHandler
 
 
 class JobManagementPage:
     def __init__ (self):
-        self.pipeline = JobPipeline()
+        self.job_handler = jobHandler()
+        self.mongo_handler = MongoDBHandler()
         
     def render(self):
         # JOB MANAGEMENT PAGE
@@ -48,9 +50,9 @@ class JobManagementPage:
                                 time.sleep(0.01)
                                 progress_bar.progress(i + 1)
                             
-                            jobs = self.pipeline.generation_pipeline(
-                                job_num=jobs_per_domain,
-                                job_domain=selected_domains
+                            jobs = self.job_handler.generate_job(
+                                job_num= jobs_per_domain,
+                                job_domains=selected_domains
                             )
 
                             st.success(f"✅ Generated {len(jobs)} job positions!")
@@ -72,9 +74,7 @@ class JobManagementPage:
                         with st.spinner("Processing job description..."):
                             time.sleep(2)
                             
-                            self.pipeline.creation_pipeline(
-                                job_description=job_text.strip()
-                            )
+                            self.job_handler.process_job_description(job_text.strip())
                             
                             st.success("✅ Job description processed!")
                             st.balloons()

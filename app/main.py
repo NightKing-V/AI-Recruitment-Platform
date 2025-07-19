@@ -11,7 +11,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
 # Now import the app
-from ui.app import App
+from app.ui.app import App
 
 # Application entry point
 if __name__ == "__main__":

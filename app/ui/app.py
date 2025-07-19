@@ -7,7 +7,7 @@ from datetime import datetime
 from io import StringIO
 import base64
 
-from ui.components.Header import Header
+from ..ui.components.Header import Header
 from ui.components.Sidebar import Sidebar
 from ui.components.Footer import Footer
 from ui.pages.Analytics import AnalyticsPage

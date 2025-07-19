@@ -5,10 +5,9 @@ import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
 
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
+repo_root = os.path.dirname(os.path.abspath(__file__))  # /mount/src/ai-recruitment-platform/app
+repo_root = os.path.dirname(repo_root)  # /mount/src/ai-recruitment-platform
+sys.path.insert(0, repo_root)
 
 # Now import the app
 from app.ui.app import App

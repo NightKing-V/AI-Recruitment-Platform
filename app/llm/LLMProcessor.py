@@ -33,7 +33,7 @@ class LLMProcessor:
             return None
         
         # Define the structured prompt for resume data extraction
-        prompt = self.prompts.resume_extraction_prompt(resume_text)
+        prompt = self.prompts.resume_extraction_prompt(resume_text=resume_text)
         
         try:
             # Use the Groq client to process the resume

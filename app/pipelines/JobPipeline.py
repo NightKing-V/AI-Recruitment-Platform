@@ -180,67 +180,7 @@ class JobPipeline:
             self.logger.error(f"Traceback: {traceback.format_exc()}")
             return {"success": False, "error": str(e)}
 
-    def search_jobs_pipeline(self, resume_text: str, filters: Optional[Dict[str, Any]] = None, limit: int = 10) -> Dict[str, Any]:
-        """
-        Pipeline for job search:
-        1. Generate resume embedding
-        2. Search similar jobs in Qdrant
-        3. Retrieve job details from MongoDB
-        """
-        try:
-            self.logger.info("Starting job search pipeline")
-            
-            # Step 1: Generate resume embedding
-            resume_embedding = self.embedding_handler.get_resume_embedding(resume_text)
-            
-            if not resume_embedding:
-                self.logger.error("Failed to generate resume embedding")
-                return {"success": False, "error": "Failed to generate resume embedding"}
-            
-            self.logger.info(f"Generated resume embedding with dimension: {len(resume_embedding)}")
-            
-            # Step 2: Search similar jobs
-            search_results = self.vector_handler.search_similar_jobs(
-                query_vector=resume_embedding,
-                limit=limit,
-                filters=filters
-            )
-            
-            if not search_results:
-                self.logger.info("No similar jobs found")
-                return {"success": True, "jobs": [], "count": 0}
-            
-            # Extract job IDs from search results (assuming search returns list of IDs or objects with IDs)
-            if isinstance(search_results[0], dict) and 'id' in search_results[0]:
-                job_ids = [result['id'] for result in search_results]
-            else:
-                job_ids = search_results
-            
-            self.logger.info(f"Found {len(job_ids)} similar jobs")
-            
-            # Step 3: Retrieve job details from MongoDB
-            jobs = []
-            for job_id in job_ids:
-                job = self.mongo_handler.get_job_by_id(job_id)
-                if job:
-                    jobs.append(job)
-                else:
-                    self.logger.warning(f"Job with ID {job_id} not found in MongoDB")
-            
-            self.logger.info(f"Retrieved {len(jobs)} job details from MongoDB")
-            
-            return {
-                "success": True,
-                "jobs": jobs,
-                "count": len(jobs)
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Error in search jobs pipeline: {e}")
-            import traceback
-            self.logger.error(f"Traceback: {traceback.format_exc()}")
-            return {"success": False, "error": str(e)}
-    
+
     def delete_job_pipeline(self, job_id: str) -> Dict[str, Any]:
         """
         Pipeline for deleting a single job:

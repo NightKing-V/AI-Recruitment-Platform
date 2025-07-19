@@ -75,14 +75,6 @@ class App:
                 display: inline-block;
             }
             
-            .recommendation-card {
-                background: #f8f9fa;
-                padding: 1rem;
-                border-radius: 8px;
-                border-left: 4px solid #4caf50;
-                margin-bottom: 1rem;
-            }
-            
             .sidebar .sidebar-content {
                 background: #1e293b;
             }

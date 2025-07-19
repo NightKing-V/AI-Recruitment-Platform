@@ -1,6 +1,7 @@
 import streamlit as st
 import fitz  # PyMuPDF
 import docx
+import io
 
 class FileProcessor:
     """Handles file upload and text extraction from different file formats"""
@@ -74,3 +75,53 @@ class FileProcessor:
         else:
             st.error(f"Unsupported file type: {file_type}")
             return ""
+
+    @staticmethod
+    def download_jobs_as_pdf(jobs: list, scores: list):
+        """
+        Generate a downloadable PDF containing job recommendations using PyMuPDF.
+        """
+        if not jobs:
+            st.warning("No jobs available to download.")
+            return None
+
+        # Create a new PDF
+        pdf = fitz.open()
+        page = pdf.new_page()
+
+        # Starting position
+        y = 50
+        x = 50
+
+        # Title
+        title = "Job Recommendations"
+        page.insert_text((x, y), title, fontsize=16, fontname="helv", fill=(0, 0, 0))
+        y += 30
+
+        for i, (job, score) in enumerate(zip(jobs, scores), 1):
+            similarity_pct = score * 100  # convert to percentage
+
+            text = (
+                f"{i}. {job['job_title']} at {job['company']}\n"
+                f"Match Score: {similarity_pct:.2f}%\n"
+                f"Location: {job['location']}\n"
+                f"Experience: {job['experience_level']}\n"
+                f"Job Type: {job['employment_type']}\n"
+                f"Required Skills: {', '.join(job['required_skills'])}\n"
+                f"Description: {job['summary']}...\n"
+            )
+
+            # Check for page overflow
+            if y > page.rect.height - 100:
+                page = pdf.new_page()
+                y = 50
+
+            page.insert_text((x, y), text, fontsize=10, fontname="helv", fill=(0, 0, 0))
+            y += 100  # spacing between jobs
+
+        # Save to memory buffer
+        pdf_buffer = io.BytesIO()
+        pdf.save(pdf_buffer)
+        pdf_buffer.seek(0)
+
+        return pdf_buffer

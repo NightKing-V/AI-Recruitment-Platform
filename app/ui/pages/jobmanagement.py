@@ -9,7 +9,7 @@ class JobManagementPage:
     def __init__ (self):
         self.job_handler = jobHandler()
         self.mongo_handler = MongoDBHandler()
-        
+            
     def render(self):
         # JOB MANAGEMENT PAGE
         with st.container():
@@ -22,7 +22,9 @@ class JobManagementPage:
             with tab1:
                 st.write("Generate Job Descriptions")
                 
-                domains = [
+                domains = st.session_state.domains
+                if not domains:
+                    st.session_state.domains = [
                     "Software Engineering", "Data Science", "DevOps",
                     "Machine Learning", "Quality Assurance", "Project Management",
                     "Business Analytics"

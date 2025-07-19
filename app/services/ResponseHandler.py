@@ -54,14 +54,11 @@ class ResponseHandler:
 
 
     
-    def _validate_and_clean_resume(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate and clean the extracted data"""
-        
-        # Define the expected structure with defaults
+    def _validate_and_clean_resume(self, data: Any) -> Dict[str, Any]:
+        """Validate and clean the extracted resume data"""
+
         default_structure = {
             "name": "",
-            "email": "",
-            "phone": "",
             "location": "",
             "summary": "",
             "skills": [],
@@ -71,34 +68,24 @@ class ResponseHandler:
             "languages": [],
             "projects": []
         }
-        
-        # Merge with defaults to ensure all required fields exist
+
+        # If the data is a list, take the first item
+        if isinstance(data, list):
+            data = data[0] if data else {}
+
+        # Ensure it's a dictionary
+        if not isinstance(data, dict):
+            data = {}
+
+        cleaned_resume = {}
         for key, default_value in default_structure.items():
-            if key not in data:
-                data[key] = default_value
-            elif data[key] is None:
-                data[key] = default_value
-        
-        # Clean and validate specific fields
-        if not isinstance(data["skills"], list):
-            data["skills"] = []
-        
-        if not isinstance(data["experience"], list):
-            data["experience"] = []
-        
-        if not isinstance(data["education"], list):
-            data["education"] = []
-        
-        if not isinstance(data["certifications"], list):
-            data["certifications"] = []
-        
-        if not isinstance(data["languages"], list):
-            data["languages"] = []
-        
-        if not isinstance(data["projects"], list):
-            data["projects"] = []
-        
-        return data
+            value = data.get(key, default_value)
+            if key in ["skills", "experience", "education", "certifications", "languages", "projects"] and not isinstance(value, list):
+                value = []
+            cleaned_resume[key] = value
+
+        return cleaned_resume
+
     
     
     def _validate_and_clean_jd(self, data: Any) -> List[Dict[str, Any]]:

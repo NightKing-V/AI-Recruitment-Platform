@@ -3,6 +3,11 @@ import streamlit as st
 
 class HomePage:
     def __init__ (self):
+        st.session_state.domains = [
+                    "Software Engineering", "Data Science", "DevOps",
+                    "Machine Learning", "Quality Assurance", "Project Management",
+                    "Business Analytics"
+                ]
         st.markdown("""
         <style>
             .metric-card {

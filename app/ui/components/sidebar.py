@@ -59,7 +59,8 @@ class Sidebar:
                 padding: 0.5rem;
                 border-radius: 6px;
                 margin: 0.3rem 0;
-                border-left: 4px solid #28a745;
+                border-left: 4px solid #764ba2;
+                color: #000;
             }
             
             .skill-tag-sidebar {
@@ -106,11 +107,12 @@ class Sidebar:
             # Extract text from the file
             with st.spinner("Extracting text from file..."):
                 resume_text = self.file_processor.process_file(uploaded_file)
+                # st.write(resume_text)
             
             if resume_text:
                 # Send to LLM for structuring
                 with st.spinner("Analyzing resume with AI..."):
-                    structured_data = LLMProcessor.structure_resume_data(resume_text)
+                    structured_data = self.llm_processor.structure_resume_data(resume_text=resume_text)
                 
                 if structured_data:
                     st.session_state.resume_data = structured_data
@@ -161,8 +163,6 @@ class Sidebar:
             st.sidebar.markdown(f"""
             <div class="resume-info">
                 <strong>👤 {resume.get('name', 'Unknown')}</strong><br>
-                <small>📧 {resume.get('email', 'No email')}</small><br>
-                <small>📞 {resume.get('phone', 'No phone')}</small>
             </div>
             """, unsafe_allow_html=True)
             
@@ -174,14 +174,6 @@ class Sidebar:
                 if len(resume['skills']) > 4:
                     skills_html += f'<span class="skill-tag-sidebar">+{len(resume["skills"]) - 4} more</span>'
                 st.sidebar.markdown(skills_html, unsafe_allow_html=True)
-            
-            # Experience count
-            experience_count = len(resume.get('experience', []))
-            st.sidebar.metric("💼 Experience", f"{experience_count} positions")
-            
-            # Education count
-            education_count = len(resume.get('education', []))
-            st.sidebar.metric("🎓 Education", f"{education_count} degrees")
             
             # Clear resume button
             if st.sidebar.button("🗑️ Clear Resume", key="clear_resume"):

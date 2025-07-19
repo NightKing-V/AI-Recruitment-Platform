@@ -110,45 +110,22 @@ class QdrantHandler:
             self.logger.error(f"Error storing job vector for job_id {job_id}: {e}")
             return False
     
-    def search_similar_jobs(self, query_vector: List[float], limit: int = 10, filters: Optional[Dict[str, Any]] = None) -> List[str]:
+    def search_similar_jobs(self, query_vector: List[float], limit: int = 10) -> List[str]:
         """Search for similar jobs using vector similarity, returning only job IDs"""
         try:
-            query_filter = None
-            if filters:
-                conditions = []
-                if "department" in filters and filters["department"]:
-                    conditions.append(FieldCondition(
-                        key="department",
-                        match=MatchValue(value=filters["department"])
-                    ))
-                if "job_domain" in filters and filters["job_domain"]:
-                    conditions.append(FieldCondition(
-                        key="job_domain",
-                        match=MatchValue(value=filters["job_domain"])
-                    ))
-                if "experience_level" in filters and filters["experience_level"]:
-                    conditions.append(FieldCondition(
-                        key="experience_level",
-                        match=MatchValue(value=filters["experience_level"])
-                    ))
-                if "location" in filters and filters["location"]:
-                    conditions.append(FieldCondition(
-                        key="location",
-                        match=MatchValue(value=filters["location"])
-                    ))
-                if conditions:
-                    query_filter = Filter(must=conditions)
 
             search_results = self.client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
-                query_filter=query_filter,
                 limit=limit
             )
 
             job_ids = [result.payload.get("job_id") for result in search_results if result.payload.get("job_id")]
+            scores = [result.score for result in search_results if result.payload.get("job_id")]
+
             self.logger.info(f"Found {len(job_ids)} similar jobs")
-            return job_ids
+            return job_ids, scores
+
 
         except Exception as e:
             self.logger.error(f"Error searching similar jobs: {e}")

@@ -7,13 +7,13 @@ from datetime import datetime
 from io import StringIO
 import base64
 
-from app.ui.components.Header import Header
-from app.ui.components.Sidebar import Sidebar
-from app.ui.components.Footer import Footer
-from app.ui.pages.Analytics import AnalyticsPage
-from app.ui.pages.JobManagement import JobManagementPage
-from app.ui.pages.Recommendations import RecommendationsPage
-from app.ui.pages.Home import HomePage
+from ui.components.Header import Header
+from ui.components.Sidebar import Sidebar
+from ui.components.Footer import Footer
+from ui.pages.Analytics import AnalyticsPage
+from ui.pages.JobManagement import JobManagementPage
+from ui.pages.Recommendations import RecommendationsPage
+from ui.pages.Home import HomePage
 
 
 

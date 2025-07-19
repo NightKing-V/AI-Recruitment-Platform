@@ -144,7 +144,7 @@ class RecommendationsPage:
                 jobs=jobs,
                 scores=scores
             )
-            if pdf_buffer:  # Only show download button if PDF was generated
+            if pdf_buffer:
                 st.download_button(
                     label="📥 Download PDF",
                     data=pdf_buffer,

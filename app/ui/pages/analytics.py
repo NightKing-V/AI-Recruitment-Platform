@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
-
+import pandas as pd
 
 class AnalyticsPage:
     # def __init__(self):
@@ -13,8 +13,7 @@ class AnalyticsPage:
             st.header("📊 Analytics Dashboard")
             
             # Use mock data for demonstration
-            jobs_data = None
-            # st.session_state.job_descriptions if st.session_state.job_descriptions else mock_jobs
+            jobs_data = st.session_state.job_descriptions
             
             if not jobs_data:
                 st.info("No data available for analytics. Please generate some job descriptions first.")

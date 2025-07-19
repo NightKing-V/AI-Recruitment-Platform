@@ -138,16 +138,30 @@ class MongoDBHandler:
             self.client.close()
             logging.info("MongoDB connection closed")
             
-    def search_jobs(self, search_term: str = "", limit: int = 50) -> List[Dict[str, Any]]:
-        """Search jobs by a text term."""
+                
+    def search_jobs(self, search_term: str = "") -> List[Dict[str, Any]]:
+        """Search jobs by a text term using regex (no index required)"""
         try:
-            query = {}
-            if search_term and search_term.strip():
-                query = {"$text": {"$search": search_term}}
-
-            jobs = list(
-                self.jobs_collection.find(query).limit(limit).sort("created_at", -1)
-            )
+            if not search_term or not search_term.strip():
+                # Return all jobs if no search term
+                jobs = list(self.jobs_collection.find().sort("created_at", -1))
+            else:
+                search_term = search_term.strip()
+                
+                # Use regex search (case-insensitive)
+                regex_pattern = {"$regex": search_term, "$options": "i"}
+                query = {
+                    "$or": [
+                        {"job_title": regex_pattern},
+                        {"company": regex_pattern},
+                        {"summary": regex_pattern},
+                        {"location": regex_pattern},
+                        {"employment_type": regex_pattern},
+                        {"experience_level": regex_pattern},
+                        {"required_skills": {"$elemMatch": {"$regex": search_term, "$options": "i"}}}
+                    ]
+                }
+                jobs = list(self.jobs_collection.find(query).limit(limit).sort("created_at", -1))
 
             # Convert ObjectId to string
             for job in jobs:

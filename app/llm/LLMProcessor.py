@@ -62,7 +62,7 @@ class LLMProcessor:
             return structured_data
 
         except Exception as e:
-            st.error(f"Error generating job description: {str(e)}")
+            st.error(f"An error occurred!")
             return None
         
     def job_summary_generator(self, job_desc: str) -> Optional[Dict[str, Any]]:
@@ -80,6 +80,6 @@ class LLMProcessor:
             return structured_data
 
         except Exception as e:
-            st.error(f"Error creating job: {str(e)}")
+            st.error(f"An error occurred!")
             return None
             

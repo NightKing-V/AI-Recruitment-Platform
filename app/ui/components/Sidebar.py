@@ -273,7 +273,7 @@ class Sidebar:
                 st.session_state.resume_data = None
                 st.session_state.uploaded_file = None
                 st.sidebar.success("Resume cleared!")
-                st.rerun()
+                self.__init__()
                 
         else:
             st.sidebar.markdown("""

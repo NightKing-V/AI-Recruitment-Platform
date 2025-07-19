@@ -137,3 +137,18 @@ class MongoDBHandler:
         if self.client:
             self.client.close()
             logging.info("MongoDB connection closed")
+            
+    def search_jobs(self, query: Dict[str, Any], limit: int = 50) -> List[Dict[str, Any]]:
+        """Search jobs with filters"""
+        try:
+            jobs = list(self.jobs_collection.find(query).limit(limit).sort("created_at", -1))
+            
+            # Convert ObjectId to string
+            for job in jobs:
+                job["_id"] = str(job["_id"])
+            
+            return jobs
+            
+        except PyMongoError as e:
+            logging.error(f"Error searching jobs: {e}")
+            return []

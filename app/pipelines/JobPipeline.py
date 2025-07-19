@@ -28,7 +28,6 @@ class JobPipeline:
             job_count = len(jobs)
             self.logger.info(f"Starting job pipeline for {job_count} job(s)")
 
-            # DEBUG: Print first job structure
             if jobs:
                 self.logger.info(f"DEBUG: First job keys: {list(jobs[0].keys())}")
                 self.logger.info(f"DEBUG: First job sample: {dict(list(jobs[0].items())[:3])}")
@@ -182,14 +181,6 @@ class JobPipeline:
 
 
     def delete_job_pipeline(self, job_id: str) -> Dict[str, Any]:
-        """
-        Pipeline for deleting a single job:
-        1. Delete from MongoDB
-        2. Delete vector from Qdrant
-
-        Args:
-            job_id: Single job ID string
-        """
         try:
             self.logger.info(f"Starting job deletion pipeline for job ID: {job_id}")
 

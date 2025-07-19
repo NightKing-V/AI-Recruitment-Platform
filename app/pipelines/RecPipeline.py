@@ -15,12 +15,6 @@ class RecommendationsPipeline:
         self.logger = logging.getLogger(__name__)
         
     def search_jobs_pipeline(self, resume_text: str, limit: int = 10) -> Dict[str, Any]:
-        """
-        Pipeline for job search:
-        1. Generate resume embedding
-        2. Search similar jobs in Qdrant
-        3. Retrieve job details from MongoDB
-        """
         try:
             self.logger.info("Starting job search pipeline")
             

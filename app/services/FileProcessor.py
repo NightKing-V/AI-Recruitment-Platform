@@ -4,11 +4,9 @@ import docx
 import io
 
 class FileProcessor:
-    """Handles file upload and text extraction from different file formats"""
     
     @staticmethod
     def extract_text_from_pdf(uploaded_file) -> str:
-        """Extract text from PDF file using PyMuPDF"""
         try:
             # Reset file pointer to beginning
             uploaded_file.seek(0)
@@ -32,7 +30,6 @@ class FileProcessor:
     
     @staticmethod
     def extract_text_from_docx(uploaded_file) -> str:
-        """Extract text from DOCX file"""
         try:
             # Reset file pointer to beginning
             uploaded_file.seek(0)
@@ -47,7 +44,6 @@ class FileProcessor:
     
     @staticmethod
     def extract_text_from_txt(uploaded_file) -> str:
-        """Extract text from TXT file"""
         try:
             # Reset file pointer to beginning
             uploaded_file.seek(0)
@@ -60,7 +56,6 @@ class FileProcessor:
     
     @classmethod
     def process_file(cls, uploaded_file) -> str:
-        """Process uploaded file and extract text based on file type"""
         if uploaded_file is None:
             return ""
         
@@ -78,9 +73,6 @@ class FileProcessor:
 
     @staticmethod
     def download_jobs_as_pdf(jobs: list, scores: list):
-        """
-        Generate a professionally formatted downloadable PDF containing job recommendations using PyMuPDF.
-        """
         if not jobs:
             st.warning("No jobs available to download.")
             return None
@@ -121,7 +113,7 @@ class FileProcessor:
             return y_pos + 60
         
         def add_summary_box(page, y_pos, total_jobs):
-            """Add summary information box"""
+            # """Add summary information box"""
             # Summary box
             summary_rect = fitz.Rect(margin_left, y_pos, margin_right, y_pos + 40)
             page.draw_rect(summary_rect, color=light_gray, fill=light_gray)
@@ -133,7 +125,7 @@ class FileProcessor:
             return y_pos + 60
         
         def wrap_text(text, max_width, fontsize=10):
-            """Simple text wrapping function"""
+            # """Simple text wrapping function"""
             words = text.split()
             lines = []
             current_line = ""
@@ -154,7 +146,7 @@ class FileProcessor:
             return lines
         
         def add_job_card(page, job, score, rank, y_pos):
-            """Add a formatted job card"""
+            # """Add a formatted job card"""
             card_height = 140
             similarity_pct = score * 100
             

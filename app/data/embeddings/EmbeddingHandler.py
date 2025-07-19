@@ -64,7 +64,7 @@ class EmbeddingHandler:
                     raise Exception(f"Failed to get embeddings after {self.max_retries} attempts: {e}")
     
     def get_embeddings(self, texts: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
-        """Get embeddings for text(s). Can handle single string or list of strings."""
+        #Get embeddings for text(s). Can handle single string or list of strings.
         try:
             # Handle single string input
             if isinstance(texts, str):
@@ -96,10 +96,10 @@ class EmbeddingHandler:
             raise e
     
     def get_job_embeddings(self, jobs: List[dict]) -> List[List[float]]:
-        """
-        Get embeddings for job descriptions.
-        Creates one embedding per job using title, description, and required skills.
-        """
+        
+        # Get embeddings for job descriptions.
+        # Creates one embedding per job using title, description, and required skills.
+        
         try:
             self.logger.info(f"Getting embeddings for {len(jobs)} jobs")
             
@@ -179,9 +179,9 @@ class EmbeddingHandler:
             raise e
     
     def get_resume_embedding(self, resume: Union[str, dict]) -> List[float]:
-        """
-        Get embedding for resume - can handle both string and dict input.
-        """
+
+        # Get embedding for resume - can handle both string and dict input.
+
         try:
             self.logger.info(f"Getting resume embedding for: {type(resume)}")
             

@@ -8,18 +8,13 @@ from pipelines.JobPipeline import JobPipeline
 
 
 class jobHandler:
-    """Generate realistic job descriptions using LLM"""
-    
+
     def __init__(self):
         self.llm_processor = LLMProcessor()
         self.pipeline = JobPipeline()
             
             
     def generate_job(self, job_num: int, job_domains: List[str]) -> List[Dict[str, Any]]:
-        """
-        Generate job descriptions for given domains using LLM.
-        If pipeline parsing fails, redo generation + pipeline.
-        """
         if not self.llm_processor._initialize_llm():
             return []
 
@@ -45,10 +40,8 @@ class jobHandler:
                     return []
 
             
-            
         
     def create_job(self, job_desc: str) -> Optional[str]:
-        
         if not job_desc:
             st.error("Job description cannot be empty")
             return None

@@ -2,8 +2,6 @@ import streamlit as st
 
 
 class Footer:
-    # def __init__(self):
-    #     self.setup_footer()
         
     def render(self):
         # Footer

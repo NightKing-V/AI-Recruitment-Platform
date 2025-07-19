@@ -2,11 +2,8 @@ import streamlit as st
 
 
 class Header:
-    # def __init__(self):
-    #     self.setup_header()
         
     def render(self):
-        # Main Header
         st.markdown("""
         <style>
         .main-header {

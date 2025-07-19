@@ -65,18 +65,4 @@ class HomePage:
                     <p>Create realistic job descriptions across domains</p>
                 </div>
                 """, unsafe_allow_html=True)
-            
-            # if st.session_state.job_descriptions:
-            #     st.write(f"✅ {len(st.session_state.job_descriptions)} jobs in database")
-            # else:
-            #     st.write("📋 No jobs generated yet")
-            
-            # if st.session_state.resume_data:
-            #     st.write(f"✅ Resume uploaded for {st.session_state.resume_data['name']}")
-            # else:
-            #     st.write("📄 No resume uploaded yet")
-            
-            # if st.session_state.recommendations:
-            #     st.write(f"✅ {len(st.session_state.recommendations)} job recommendations available")
-            # else:
-            #     st.write("🎯 No recommendations generated yet")
+        

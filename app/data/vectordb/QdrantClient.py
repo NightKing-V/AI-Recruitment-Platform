@@ -7,7 +7,6 @@ import uuid
 import streamlit as st
 
 class QdrantHandler:
-    """Handle Qdrant vector database operations for job matching"""
     
     def __init__(self, collection_name: str = "jobs"):
         self.client = None
@@ -17,7 +16,7 @@ class QdrantHandler:
         self.connect()
     
     def connect(self):
-        """Connect to Qdrant"""
+        # Connect to Qdrant
         try:
             # Get Qdrant configuration from environment or Streamlit secrets
             qdrant_url = os.getenv("QDRANT_URL") or st.secrets.get("QDRANT_URL")
@@ -43,7 +42,6 @@ class QdrantHandler:
             return False
     
     def ensure_collection_exists(self):
-        """Create collection if it doesn't exist"""
         try:
             collections = self.client.get_collections()
             collection_names = [col.name for col in collections.collections]
@@ -65,7 +63,6 @@ class QdrantHandler:
             raise
     
     def store_job_vector(self, job_data: Dict[str, Any], embedding: List[float], job_id: str) -> bool:
-        """Store a single job vector - simplified to match pipeline usage"""
         try:
             self.logger.info(f"Storing job vector for job_id: {job_id}")
             
@@ -111,7 +108,6 @@ class QdrantHandler:
             return False
     
     def search_similar_jobs(self, query_vector: List[float], limit: int = 10) -> List[str]:
-        """Search for similar jobs using vector similarity, returning only job IDs"""
         try:
 
             search_results = self.client.search(
@@ -132,7 +128,6 @@ class QdrantHandler:
             return []
     
     def delete_job_vector(self, job_id: str) -> bool:
-        """Delete job vector by job_id - simplified for single job deletion"""
         try:
             self.logger.info(f"Deleting job vector for job_id: {job_id}")
             
@@ -170,7 +165,6 @@ class QdrantHandler:
             return False
     
     def get_collection_info(self) -> Dict[str, Any]:
-        """Get information about the collection"""
         try:
             info = self.client.get_collection(self.collection_name)
             return {
@@ -183,7 +177,6 @@ class QdrantHandler:
             return {}
     
     def delete_collection(self) -> bool:
-        """Delete the entire collection"""
         try:
             self.client.delete_collection(self.collection_name)
             self.logger.info(f"Deleted collection: {self.collection_name}")

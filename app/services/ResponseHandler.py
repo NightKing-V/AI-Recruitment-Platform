@@ -6,8 +6,6 @@ from typing import Dict, Any, Optional, List
 class ResponseHandler:
     
     def _parse_llm_response(self, response) -> Optional[Any]:
-        """Parse the LLM response and extract JSON data (handles AIMessage, dict, list, or string)."""
-
         try:
 
             # Case 1: AIMessage (LangChain)
@@ -55,7 +53,6 @@ class ResponseHandler:
 
     
     def _validate_and_clean_resume(self, data: Any) -> Dict[str, Any]:
-        """Validate and clean the extracted resume data"""
 
         default_structure = {
             "name": "",
@@ -89,7 +86,6 @@ class ResponseHandler:
     
     
     def _validate_and_clean_jd(self, data: Any) -> List[Dict[str, Any]]:
-        """Validate and clean a list of job descriptions"""
         default_structure = {
             "job_title": "",
             "job_domain": "",

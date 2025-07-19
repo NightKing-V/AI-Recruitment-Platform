@@ -34,30 +34,9 @@ class RecommendationsPage:
                 st.warning("⚠️ Please upload a resume first to get recommendations.")
                 st.info("Go to the 'Resume Upload' page to upload your resume.")
             else:
-                # # Display resume summary
-                # st.subheader("📄 Your Resume Summary")
                 
                 resume = st.session_state.resume_data
                 
-                # col1, col2, col3 = st.columns(3)
-                
-                # with col1:
-                #     st.metric("Name", resume['name'])
-                
-                # with col2:
-                #     st.metric("Skills", len(resume['skills']))
-                
-                # with col3:
-                #     st.metric("Experience", f"{len(resume['experience'])} positions")
-                
-                # # Show top skills
-                # st.write("**Top Skills:**")
-                # skills_html = " ".join([f'<span class="skill-tag">{skill}</span>' for skill in resume['skills'][:6]])
-                # st.markdown(skills_html, unsafe_allow_html=True)
-
-                # st.markdown("---")
-
-                # Slider and download button in one row
                 col1, col2 = st.columns([3, 1])
                 recommendations = {"success": False, "jobs": [], "scores": [], "error": False}
 

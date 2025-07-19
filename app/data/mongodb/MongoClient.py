@@ -5,11 +5,10 @@ from pymongo.errors import PyMongoError
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import streamlit as st
+from bson import ObjectId
 
 
 class MongoDBHandler:
-    """Handle MongoDB operations for job descriptions and resumes"""
-    
     def __init__(self):
         self.client = None
         self.db = None
@@ -18,7 +17,7 @@ class MongoDBHandler:
         self.connect()
     
     def connect(self):
-        """Connect to MongoDB"""
+        # Connect to MongoDB
         try:
             # Get MongoDB connection string from environment or Streamlit secrets
             mongo_uri = os.getenv("MONGODB_URI") or st.secrets.get("MONGODB_URI")
@@ -46,11 +45,6 @@ class MongoDBHandler:
             return False
     
     def store_jobs(self, jobs_data: Any) -> Optional[List[str]]:
-        """
-        Store one or multiple job descriptions in MongoDB.
-        Accepts either a single dict or a list of dicts.
-        Returns list of inserted IDs as strings, or None on failure.
-        """
         try:
             if isinstance(jobs_data, dict):
                 # Single job
@@ -79,9 +73,8 @@ class MongoDBHandler:
             return None
     
     def get_job_by_id(self, job_id: str) -> Optional[Dict[str, Any]]:
-        """Get job by ID"""
         try:
-            from bson import ObjectId
+
             job = self.jobs_collection.find_one({"_id": ObjectId(job_id)})
             if job:
                 job["_id"] = str(job["_id"])
@@ -92,7 +85,6 @@ class MongoDBHandler:
             return None
     
     def get_all_jobs(self) -> List[Dict[str, Any]]:
-        """Get all jobs with optional limit"""
         try:
             jobs = list(self.jobs_collection.find().sort("created_at", -1))
             
@@ -105,26 +97,10 @@ class MongoDBHandler:
         except PyMongoError as e:
             logging.error(f"Error retrieving jobs: {e}")
             return []
-    
-    def search_jobs(self, query: Dict[str, Any], limit: int = 50) -> List[Dict[str, Any]]:
-        """Search jobs with filters"""
-        try:
-            jobs = list(self.jobs_collection.find(query).limit(limit).sort("created_at", -1))
-            
-            # Convert ObjectId to string
-            for job in jobs:
-                job["_id"] = str(job["_id"])
-            
-            return jobs
-            
-        except PyMongoError as e:
-            logging.error(f"Error searching jobs: {e}")
-            return []
+
     
     def delete_job(self, job_id: str) -> bool:
-        """Delete job by ID"""
         try:
-            from bson import ObjectId
             result = self.jobs_collection.delete_one({"_id": ObjectId(job_id)})
             return result.deleted_count > 0
             
@@ -133,7 +109,6 @@ class MongoDBHandler:
             return False
     
     def store_resume(self, resume_data: Dict[str, Any]) -> Optional[str]:
-        """Store resume in MongoDB"""
         try:
             # Add metadata
             resume_data["created_at"] = datetime.now()
@@ -151,7 +126,6 @@ class MongoDBHandler:
             return None
     
     def get_jobs_count(self) -> int:
-        """Get total number of jobs"""
         try:
             return self.jobs_collection.count_documents({})
         except PyMongoError as e:
@@ -159,7 +133,7 @@ class MongoDBHandler:
             return 0
 
     def close_connection(self):
-        """Close MongoDB connection"""
+        # Close MongoDB connection
         if self.client:
             self.client.close()
             logging.info("MongoDB connection closed")

@@ -1,4 +1,5 @@
 import os
+import streamlit as st
 import numpy as np
 from huggingface_hub import InferenceClient
 from typing import List, Union, Optional
@@ -14,8 +15,16 @@ class EmbeddingHandler:
                  retry_delay: float = 1.0):
 
         # Get environment variables or use defaults
-        model_name = model_name or os.getenv("HF_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-        api_token = api_token or os.getenv("HF_API_KEY")
+        model_name = (
+            os.getenv("HF_MODEL") 
+            or st.secrets.get("HF_MODEL") 
+            or "sentence-transformers/all-MiniLM-L6-v2"
+        )
+
+        api_token = (
+            os.getenv("HF_API_KEY") 
+            or st.secrets.get("HF_API_KEY")
+        )
 
         self.model_name = model_name
         self.api_token = api_token

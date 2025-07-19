@@ -127,37 +127,6 @@ sequenceDiagram
     Frontend->>User: Display Recommendations
 ```
 
-## 🔧 API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/upload` | POST | Upload and process resume |
-| `/jobs/generate` | POST | Auto-generate job descriptions |
-| `/jobs/create` | POST | Create custom job |
-| `/recommendations` | GET | Get job recommendations |
-| `/analytics` | GET | Fetch analytics data |
-
-## 📈 Performance Metrics
-
-- **Processing Speed**: Resume analysis in ~3-5 seconds
-- **Accuracy**: 95%+ semantic matching precision
-- **Scalability**: Handles 10,000+ jobs efficiently
-- **Uptime**: 99.9% cloud availability
-
-## 🧪 Testing
-
-```bash
-# Run unit tests
-python -m pytest tests/
-
-# Run integration tests
-python -m pytest tests/integration/
-
-# Test coverage
-coverage run -m pytest
-coverage report
-```
-
 ## 🚀 Deployment
 
 ### Docker
@@ -182,42 +151,11 @@ docker run -p 8501:8501 ai-recruitment-platform
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📋 Roadmap
-
-- [ ] Multi-language resume support
-- [ ] Advanced filtering options
-- [ ] Real-time collaboration features
-- [ ] Mobile app development
-- [ ] API rate limiting and caching
-- [ ] Advanced analytics with ML insights
-
 ## 🐛 Known Issues
 
 - Large PDF files (>5MB) may take longer to process
 - Some DOCX files with complex formatting might not parse correctly
 - Rate limiting on Groq API during high usage
-
-## 📄 File Structure
-
-```
-ai-recruitment-platform/
-├── app.py                 # Main Streamlit application
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── src/
-│   ├── resume_processor.py
-│   ├── job_generator.py
-│   ├── recommendation_engine.py
-│   └── analytics.py
-├── tests/
-│   ├── test_resume_processor.py
-│   └── test_recommendations.py
-├── data/
-│   └── sample_resumes/
-├── docs/
-│   └── user_manual.pdf
-└── README.md
-```
 
 ## 🔒 Security
 
@@ -234,13 +172,6 @@ ai-recruitment-platform/
 ![GitHub issues](https://img.shields.io/github/issues/username/ai-recruitment-platform)
 ![GitHub last commit](https://img.shields.io/github/last-commit/username/ai-recruitment-platform)
 
-## 📞 Support
-
-- **Documentation**: [Wiki](https://github.com/username/ai-recruitment-platform/wiki)
-- **Issues**: [GitHub Issues](https://github.com/username/ai-recruitment-platform/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/username/ai-recruitment-platform/discussions)
-- **Email**: support@recruitment-platform.com
-
 ## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -248,9 +179,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Valenteno Lenora**
-- GitHub: [@username](https://github.com/username)
-- LinkedIn: [Profile](https://linkedin.com/in/username)
-- Email: contact@email.com
+- GitHub: [@username](https://github.com/Nightking-v)
+- LinkedIn: [Profile](https://linkedin.com/in/valentenolenora)
+- Email: valentenocavlenora@gmail.com
 
 ## 🙏 Acknowledgments
 
@@ -266,7 +197,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repo if you find it useful! ⭐**
 
-Made with ❤️ by [Valenteno Lenora](https://github.com/username)
+Made with ❤️ by [Valenteno Lenora](https://github.com/Nightking-v)
 
 [![Built with Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-FF4B4B?style=flat&logo=streamlit)](https://streamlit.io/)
 [![Powered by AI](https://img.shields.io/badge/Powered%20by-AI-00D4AA?style=flat)](https://github.com/username/ai-recruitment-platform)

@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# Add the current directory to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 # Now import the app
 from ui.app import App

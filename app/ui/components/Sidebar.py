@@ -19,6 +19,9 @@ class Sidebar:
             st.session_state.uploaded_file = None
         if 'processing' not in st.session_state:
             st.session_state.processing = False
+            
+        self.uploaded_file = None
+
         
         st.sidebar.markdown("""
         <style>
@@ -220,18 +223,21 @@ class Sidebar:
         st.sidebar.subheader("📄 Upload Your Resume")
         st.sidebar.markdown('</div>', unsafe_allow_html=True)
         
+        if "upload_key" not in st.session_state:
+            st.session_state.upload_key = 0
+        
         with st.sidebar.container():
-            uploaded_file = st.file_uploader(
+            self.uploaded_file = st.file_uploader(
                 "Choose a resume file",
                 type=['pdf', 'docx', 'txt'],
                 help="Supported formats: PDF, DOCX, TXT",
-                key="sidebar_file_upload"
+                key=f"sidebar_file_upload_{st.session_state.upload_key}"
             )
 
             
             # Process the file if uploaded
-            if uploaded_file is not None:
-                self.process_uploaded_file(uploaded_file)
+            if self.uploaded_file is not None:
+                self.process_uploaded_file(self.uploaded_file)
         
         # Show processing status
         if st.session_state.processing:
@@ -272,8 +278,13 @@ class Sidebar:
             if st.sidebar.button("🗑️ Clear Resume", key="clear_resume", type="secondary"):
                 st.session_state.resume_data = None
                 st.session_state.uploaded_file = None
+                st.session_state.processing = False
+                self.uploaded_file = None
+                st.cache_data.clear()
+                st.cache_resource.clear()
+                st.session_state.upload_key += 1
                 st.sidebar.success("Resume cleared!")
-                self.__init__()
+                st.rerun()
                 
         else:
             st.sidebar.markdown("""

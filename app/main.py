@@ -9,9 +9,6 @@ repo_root = os.path.dirname(os.path.abspath(__file__))  # /mount/src/ai-recruitm
 repo_root = os.path.dirname(repo_root)  # /mount/src/ai-recruitment-platform
 sys.path.insert(0, repo_root)
 
-import os
-print("Components dir:", os.listdir(os.path.join(os.path.dirname(__file__), "ui", "components")))
-
 # Now import the app
 from app.ui.app import App
 

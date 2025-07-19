@@ -37,7 +37,7 @@ class HomePage:
         with st.container():
             st.subheader("Welcome to AI-Powered Recruitment!")
             
-            st.write("An intelligent recruitment platform that helps recruiters efficiently shortlist candidates by matching uploaded resumes against a database of job descriptions using Retrieval-Augmented Generation (RAG). The system utilizes semantic search with Qdrant, and LLMs (via Groq/Mistral) to extract and analyze key resume details, enabling accurate, fast, and scalable candidate-job matching. Deployed on Streamlit Cloud with a clean, recruiter-friendly interface.")
+            st.write("An intelligent recruitment platform that helps recruiters efficiently shortlist candidates by matching uploaded resumes against a database of job descriptions using Retrieval-Augmented Generation (RAG). The system utilizes semantic search with Qdrant, and LLMs (via Groq/Llama) to extract and analyze key resume details, enabling accurate, fast, and scalable candidate-job matching. Deployed on Streamlit Cloud with a clean, recruiter-friendly interface.")
             
             # Feature highlights
             col1, col2, col3 = st.columns(3)

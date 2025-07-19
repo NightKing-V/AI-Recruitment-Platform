@@ -13,9 +13,9 @@ import os
 print("Components dir:", os.listdir(os.path.join(os.path.dirname(__file__), "ui", "components")))
 
 # Now import the app
-from app.ui.app import App
+# from app.ui.app import App
 
-# Application entry point
-if __name__ == "__main__":
-    app = App()
-    app.run()
+# # Application entry point
+# if __name__ == "__main__":
+#     app = App()
+#     app.run()

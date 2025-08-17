@@ -20,10 +20,11 @@ class PromptTemplates:
     STRICT INSTRUCTIONS:
     1. Return ONLY valid JSON, no additional text or explanation.
     2. If information is missing, keep the field as an empty array [] or empty string "".
-    3. experience = ONLY paid professional jobs, internships, or official roles
+    3. experience = ONLY paid professional jobs, internships, or official roles. NOT Projects
     4. For skills, extract both technical and soft skills.
     5. For education, include degree, diplomas if available.
     6. The JSON structure must remain identical to the required schema.
+    7. keep it short and concise, no extra text or explanations.
 
     Required JSON structure (must always be followed):
     [
@@ -41,8 +42,7 @@ class PromptTemplates:
             ],
             "projects": [
                 {{
-                    "title": "Project Title",
-                    "technologies": "Technology1, Technology2",
+                    "title": "Project Title"
                 }}
             ],
             "education": [

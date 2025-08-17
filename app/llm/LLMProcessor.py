@@ -36,7 +36,7 @@ class LLMProcessor:
             return None
 
         current_response = ""  # empty on first page
-        logging.info(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
+        st.warning(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
 
         try:
             for page_num, page_content in resume_text.items():

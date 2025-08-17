@@ -46,7 +46,7 @@ class LLMProcessor:
                 time.sleep(delay)
 
 
-    def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:
+    def structure_resume_data_retry(self, resume_text: dict) -> Optional[Dict[str, Any]]:
         """
         Iteratively extract structured resume data page by page using Groq LLM.
         """
@@ -115,11 +115,11 @@ class LLMProcessor:
             return None
 
 
-    def structure_resume_data_with_retry(self, resume_text: dict) -> Optional[Dict[str, Any]]:
+    def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:
         """
         Wrapper around structure_resume_data with retries for the whole function.
         """
-        return retry(self.structure_resume_data, max_attempts=3, delay=3, resume_text=resume_text)
+        return retry(self.structure_resume_data_retry, max_attempts=3, delay=3, resume_text=resume_text)
 
 
 

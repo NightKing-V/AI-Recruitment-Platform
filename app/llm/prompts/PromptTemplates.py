@@ -21,7 +21,7 @@ class PromptTemplates:
     1. Return ONLY valid JSON, no additional text or explanation.
     2. If information is missing, keep the field as an empty array [] or empty string "".
     3. experience = ONLY paid professional jobs, internships, or official roles
-    4. DO NOT include projects, hobbies, student activities, or personal experiments in experience.
+    4. DO NOT include projects, hobbies, student activities, personal experiments or unclear roles in experience.
     5. For skills, extract both technical and soft skills.
     6. For education, include degree, diplomas if available.
     7. The JSON structure must remain identical to the required schema.

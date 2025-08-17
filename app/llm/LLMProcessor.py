@@ -26,15 +26,22 @@ class LLMProcessor:
         return True
     
     def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:
-        
+        """
+        Iteratively send resume pages to the LLM, progressively updating JSON.
+        Uses the raw LLM response for the next page prompt and only post-processes at the end.
+        Includes robust error handling for empty or invalid LLM responses.
+        """
         if not self._initialize_llm():
+            st.error("LLM initialization failed")
             return None
 
         current_response = ""  # empty on first page
-        logging.info(f"Starting resume data extraction with Groq LLM...{resume_text}")
+        logging.info(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
 
         try:
             for page_num, page_content in resume_text.items():
+                logging.info(f"Processing page {page_num}...")
+
                 # Build prompt with the raw response from previous iteration
                 prompt = self.prompts.resume_extraction_prompt(
                     resume_text=page_content,
@@ -44,17 +51,38 @@ class LLMProcessor:
                 # Call LLM
                 response = self.llm.invoke(prompt)
 
-                # Use the raw LLM response for the next page
-                current_response = response
+                # Check for empty response
+                if not response or not response.strip():
+                    logging.warning(f"LLM returned empty response on page {page_num}. Skipping page.")
+                    continue
+
+                # Optional: strip leading/trailing whitespace
+                current_response = response.strip()
+
+            if not current_response:
+                st.error("LLM returned no valid JSON for any page.")
+                return None
 
             # Final post-processing: parse and validate only once
-            structured_data = self.response_handler._parse_llm_response(current_response)
-            structured_data = self.response_handler._validate_and_clean_resume(structured_data)
+            try:
+                structured_data = self.response_handler._parse_llm_response(current_response)
+            except Exception as parse_err:
+                st.error(f"Error parsing JSON from LLM: {str(parse_err)}\nRaw response: {current_response[:200]}...")
+                return None
+
+            try:
+                structured_data = self.response_handler._validate_and_clean_resume(structured_data)
+            except Exception as validate_err:
+                st.error(f"Error validating/cleaning structured data: {str(validate_err)}")
+                return None
+
             return structured_data
 
         except Exception as e:
-            st.error(f"Error processing resume with Groq LLM: {str(e)}")
+            st.error(f"Unexpected error during resume processing with Groq LLM: {str(e)}")
+            logging.exception("Full traceback:")
             return None
+
 
 
     def job_description_generator(self, job_num, job_domain:str) -> Optional[Dict[str, Any]]:

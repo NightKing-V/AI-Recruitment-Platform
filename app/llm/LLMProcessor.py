@@ -26,11 +26,7 @@ class LLMProcessor:
         return True
     
     def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:
-        """
-        Iteratively send resume pages to the LLM, progressively updating JSON.
-        Uses the raw LLM response for the next page prompt and only post-processes at the end.
-        Includes robust error handling for empty or invalid LLM responses.
-        """
+        
         if not self._initialize_llm():
             st.error("LLM initialization failed")
             return None
@@ -75,6 +71,7 @@ class LLMProcessor:
 
             # Final post-processing: parse and validate only once
             try:
+                st.warning(f"{current_response[:200]}...")  # Show first 200 chars for debugging
                 structured_data = self.response_handler._parse_llm_response(current_response)
             except Exception as parse_err:
                 st.error(f"Error parsing JSON from LLM: {str(parse_err)}\nRaw response: {current_response[:200]}...")

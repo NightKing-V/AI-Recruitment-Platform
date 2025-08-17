@@ -1,4 +1,5 @@
 import streamlit as st
+import logging
 from typing import Dict, Any, Optional
 from .LLMFactory import LLMFactory
 from .clients.GroqClient import GroqClient
@@ -30,6 +31,7 @@ class LLMProcessor:
             return None
 
         current_response = ""  # empty on first page
+        logging.info(f"Starting resume data extraction with Groq LLM...{resume_text}")
 
         try:
             for page_num, page_content in resume_text.items():

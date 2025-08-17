@@ -45,10 +45,10 @@ class ResponseHandler:
 
         except json.JSONDecodeError as e:
             logging.error(f"JSON decode error: {e}")
-            return None
+            raise RuntimeError(f"Failed to parse LLM response: {e}")
         except Exception as e:
             logging.error(f"Error parsing LLM response: {e}")
-            return None
+            raise RuntimeError(f"Failed to parse LLM response: {e}")
 
 
     

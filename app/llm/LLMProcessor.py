@@ -46,73 +46,50 @@ class LLMProcessor:
                 time.sleep(delay)
 
 
-    def structure_resume_data_retry(self, resume_text: dict) -> Optional[Dict[str, Any]]:
-        """
-        Iteratively extract structured resume data page by page using Groq LLM.
-        """
+    def structure_resume_data_retry(self, resume_text: dict) -> Dict[str, Any]:
+        
         if not self._initialize_llm():
-            st.error("LLM initialization failed")
-            return None
+            raise RuntimeError("LLM initialization failed")
 
         current_response = ""  # empty on first page
-        # st.warning(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
+
+        for page_num, page_content in resume_text.items():
+            logging.info(f"Processing page {page_num}...")
+
+            prompt = self.prompts.resume_extraction_prompt(
+                resume_text=page_content,
+                existing_json=current_response
+            )
+
+            response = self.llm.invoke(prompt)
+
+            if hasattr(response, "content"):
+                response_text = response.content
+            elif hasattr(response, "text"):
+                response_text = response.text
+            else:
+                raise RuntimeError(f"Unexpected LLM response type: {type(response)}")
+
+            if not response_text.strip():
+                raise RuntimeError(f"LLM returned empty response on page {page_num}")
+
+            current_response = response_text.strip()
+
+        if not current_response:
+            raise RuntimeError("LLM returned no valid JSON for any page.")
+
+        # Final post-processing
+        try:
+            structured_data = self.response_handler._parse_llm_response(current_response)
+        except Exception as parse_err:
+            raise RuntimeError(f"Error parsing JSON from LLM: {parse_err}")
 
         try:
-            for page_num, page_content in resume_text.items():
-                logging.info(f"Processing page {page_num}...")
+            structured_data = self.response_handler._validate_and_clean_resume(structured_data)
+        except Exception as validate_err:
+            raise RuntimeError(f"Error validating/cleaning structured data: {validate_err}")
 
-                # Build prompt with the raw response from previous iteration
-                prompt = self.prompts.resume_extraction_prompt(
-                    resume_text=page_content,
-                    existing_json=current_response
-                )
-
-                # Call LLM
-                response = self.llm.invoke(prompt)
-
-                # Extract string from AIMessage object
-                if hasattr(response, "content"):
-                    response_text = response.content
-                elif hasattr(response, "text"):
-                    response_text = response.text
-                else:
-                    st.error(f"Unexpected LLM response type: {type(response)}")
-                    continue  # skip this page
-
-                # Check for empty response
-                if not response_text.strip():
-                    logging.warning(f"LLM returned empty response on page {page_num}. Skipping page.")
-                    continue
-
-                # Use raw text for next page injection
-                current_response = response_text.strip()
-
-            if not current_response:
-                st.error("LLM returned no valid JSON for any page.")
-                return None
-
-            # Final post-processing: parse JSON and validate
-            try:
-                logging.debug(f"Raw LLM response (first 200 chars): {current_response[:200]}...")
-                structured_data = self.response_handler._parse_llm_response(current_response)
-            except Exception as parse_err:
-                st.error(f"Error parsing JSON from LLM: {str(parse_err)}\nRaw response: {current_response[:200]}...")
-                logging.exception("Parsing error")
-                return None
-
-            try:
-                structured_data = self.response_handler._validate_and_clean_resume(structured_data)
-            except Exception as validate_err:
-                st.error(f"Error validating/cleaning structured data: {str(validate_err)}")
-                logging.exception("Validation error")
-                return None
-
-            return structured_data
-
-        except Exception as e:
-            st.error(f"Unexpected error during resume processing with Groq LLM: {str(e)}")
-            logging.exception("Full traceback:")
-            return None
+        return structured_data
 
 
     def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:

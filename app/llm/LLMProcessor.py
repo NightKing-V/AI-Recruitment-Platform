@@ -55,7 +55,7 @@ class LLMProcessor:
             return None
 
         current_response = ""  # empty on first page
-        st.warning(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
+        # st.warning(f"Starting resume data extraction with Groq LLM. Pages: {len(resume_text)}")
 
         try:
             for page_num, page_content in resume_text.items():
@@ -119,7 +119,7 @@ class LLMProcessor:
         """
         Wrapper around structure_resume_data with retries for the whole function.
         """
-        return retry(self.structure_resume_data_retry, max_attempts=3, delay=3, resume_text=resume_text)
+        return self.retry(self.structure_resume_data_retry, max_attempts=3, delay=3, resume_text=resume_text)
 
 
 

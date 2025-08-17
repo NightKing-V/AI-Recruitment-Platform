@@ -37,8 +37,7 @@ class PromptTemplates:
                 {{
                     "title": "Job Title",
                     "company": "Company Name", 
-                    "duration": "X years/months",
-                    "description": "Job description and key achievements"
+                    "duration": "X years/months"
                 }}
             ],
             "education": [

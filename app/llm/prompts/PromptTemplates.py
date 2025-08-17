@@ -5,26 +5,30 @@ class PromptTemplates:
     @staticmethod
     def resume_extraction_prompt(resume_text: str, existing_json: str) -> str:
         prompt = f"""
-    You are an expert resume parser. You are analyzing a multi-page resume.
-    You will be given:
-    1. The current extracted JSON (from previous pages) if available.
+    You are an expert resume parser analyzing a multi-page resume.
+
+    You are given:
+    1. The current extracted JSON (from previous pages), if available.
     2. The new page content.
 
     Your task:
     - Update the JSON with any new information found in the page.
     - Do NOT remove or overwrite existing information unless the new data is clearly more accurate.
-    - Append new items to arrays (skills, experience, education, certifications, languages).
-    - Avoid duplicates in arrays (e.g., no repeating skills or job entries).
-    - Preserve the format exactly.
+    - Append new items to arrays (skills, experience, education, certifications, languages, projects).
+    - Avoid duplicates in arrays (e.g., no repeating skills, jobs, or project entries).
+    - Preserve the JSON format exactly as specified.
 
-    STRICT INSTRUCTIONS:
-    1. Return ONLY valid JSON, no additional text or explanation.
-    2. If information is missing, keep the field as an empty array [] or empty string "".
-    3. experience = ONLY paid professional jobs, internships, or official roles. NOT Projects
-    4. For skills, extract both technical and soft skills.
-    5. For education, include degree, diplomas if available.
-    6. The JSON structure must remain identical to the required schema.
-    7. keep it short and concise, no extra text or explanations.
+    STRICT RULES:
+    1. Return ONLY valid JSON. Do NOT include any explanations or extra text.
+    2. Keep missing information as empty arrays [] or empty strings "".
+    3. EXPERIENCE: Include ONLY paid professional jobs, internships, or official roles. Do NOT include projects, personal work, academic assignments, or hobbies.
+    4. PROJECTS: Include personal, academic, research, or freelance projects here. Do NOT put them under 'experience'.
+    5. SKILLS: Include both technical and soft skills. Avoid duplicates.
+    6. EDUCATION: Include degrees, diplomas, or certifications, if available.
+    7. CERTIFICATIONS: List professional certifications.
+    8. LANGUAGES: List all languages mentioned.
+    9. Maintain the exact JSON structure below and do not add extra fields.
+    10. Keep entries concise. Do not add unnecessary explanations or descriptions.
 
     Required JSON structure (must always be followed):
     [
@@ -32,7 +36,7 @@ class PromptTemplates:
             "name": "Full Name",
             "location": "City, Country",
             "summary": "Professional summary or objective",
-            "skills": ["skill1", "skill2", "skill3"],
+            "skills": ["skill1", "skill2"],
             "experience": [
                 {{
                     "title": "Job Title",
@@ -50,8 +54,8 @@ class PromptTemplates:
                     "degree": "Degree Name"
                 }}
             ],
-            "certifications": ["certification1", "certification2"],
-            "languages": ["language1", "language2"]
+            "certifications": ["certification1"],
+            "languages": ["language1"]
         }}
     ]
 
@@ -61,8 +65,9 @@ class PromptTemplates:
     New page content:
     {resume_text}
 
-    Return the UPDATED JSON:
+    Return the UPDATED JSON following all rules above:
     """
+
         return prompt
 
         

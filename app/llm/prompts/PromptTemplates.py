@@ -16,19 +16,17 @@ class PromptTemplates:
     - Do NOT remove or overwrite existing information unless the new data is clearly more accurate.
     - Append new items to arrays (skills, experience, education, certifications, languages, projects).
     - Avoid duplicates in arrays (e.g., no repeating skills, jobs, or project entries).
-    - Preserve the JSON format exactly as specified.
 
     STRICT RULES:
     1. Return ONLY valid JSON. Do NOT include any explanations or extra text.
     2. Keep missing information as empty arrays [] or empty strings "".
     3. EXPERIENCE: Include ONLY paid professional jobs, internships, or official roles. Do NOT include projects, personal work, academic assignments, or hobbies.
-    4. PROJECTS: Include personal, academic, research, or freelance projects here. Do NOT put them under 'experience'.
+    4. Do NOT put projects them under 'experience'.
     5. SKILLS: Include both technical and soft skills. Avoid duplicates.
-    6. EDUCATION: Include degrees, diplomas, or certifications, if available.
+    6. EDUCATION: Include degrees, diplomas if available.
     7. CERTIFICATIONS: List professional certifications.
     8. LANGUAGES: List all languages mentioned.
     9. Maintain the exact JSON structure below and do not add extra fields.
-    10. Keep entries concise. Do not add unnecessary explanations or descriptions.
 
     Required JSON structure (must always be followed):
     [
@@ -42,11 +40,6 @@ class PromptTemplates:
                     "title": "Job Title",
                     "company": "Company Name", 
                     "duration": "X years/months"
-                }}
-            ],
-            "projects": [
-                {{
-                    "title": "Project Title"
                 }}
             ],
             "education": [

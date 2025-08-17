@@ -71,7 +71,7 @@ class LLMProcessor:
 
             # Final post-processing: parse and validate only once
             try:
-                st.warning(f"{current_response[:200]}...")  # Show first 200 chars for debugging
+                logging.error(f"{current_response}...")  # Show first 200 chars for debugging
                 structured_data = self.response_handler._parse_llm_response(current_response)
             except Exception as parse_err:
                 st.error(f"Error parsing JSON from LLM: {str(parse_err)}\nRaw response: {current_response[:200]}...")

@@ -51,13 +51,23 @@ class LLMProcessor:
                 # Call LLM
                 response = self.llm.invoke(prompt)
 
+                # Extract string from AIMessage object
+                if hasattr(response, "content"):
+                    response_text = response.content
+                elif hasattr(response, "text"):
+                    response_text = response.text
+                else:
+                    st.error(f"Unexpected LLM response type: {type(response)}")
+                    continue  # skip this page
+
                 # Check for empty response
-                if not response or not response.strip():
+                if not response_text.strip():
                     logging.warning(f"LLM returned empty response on page {page_num}. Skipping page.")
                     continue
 
-                # Optional: strip leading/trailing whitespace
-                current_response = response.strip()
+                # Use raw text for next page injection
+                current_response = response_text.strip()
+
 
             if not current_response:
                 st.error("LLM returned no valid JSON for any page.")

@@ -3,20 +3,29 @@
 class PromptTemplates:
 
     @staticmethod
-    def resume_extraction_prompt(resume_text: str) -> str:
-            
-            prompt = f"""
-    You are an expert resume parser. Analyze the following resume text and extract structured information in valid JSON format.
+    def resume_extraction_prompt(resume_text: str, existing_json: str) -> str:
+        prompt = f"""
+    You are an expert resume parser. You are analyzing a multi-page resume.
+    You will be given:
+    1. The current extracted JSON (from previous pages) if available.
+    2. The new page content.
+
+    Your task:
+    - Update the JSON with any new information found in the page.
+    - Do NOT remove or overwrite existing information unless the new data is clearly more accurate.
+    - Append new items to arrays (skills, experience, education, certifications, languages).
+    - Avoid duplicates in arrays (e.g., no repeating skills or job entries).
+    - Preserve the format exactly.
 
     STRICT INSTRUCTIONS:
-    1. Return ONLY valid JSON, no additional text or explanation
-    2. If information is missing, use empty arrays [] or empty strings ""
-    3. Extract all relevant information accurately
-    4. For experience, include ALL professional jobs mentioned but not activities or hobbies
-    5. For skills, extract both technical and soft skills
-    6. For education, include degree if available
+    1. Return ONLY valid JSON, no additional text or explanation.
+    2. If information is missing, keep the field as an empty array [] or empty string "".
+    3. For experience, include ALL professional jobs mentioned but not activities or hobbies.
+    4. For skills, extract both technical and soft skills.
+    5. For education, include degree, diplomas if available.
+    6. The JSON structure must remain identical to the required schema.
 
-    Required JSON structure:
+    Required JSON structure (must always be followed):
     [
         {{
             "name": "Full Name",
@@ -33,7 +42,7 @@ class PromptTemplates:
             ],
             "education": [
                 {{
-                    "degree": "Degree Name",
+                    "degree": "Degree Name"
                 }}
             ],
             "certifications": ["certification1", "certification2"],
@@ -41,12 +50,16 @@ class PromptTemplates:
         }}
     ]
 
-    Resume text to analyze:
+    Current JSON:
+    {existing_json}
+
+    New page content:
     {resume_text}
 
-    Return only the JSON structure with extracted data:
+    Return the UPDATED JSON:
     """
-            return prompt
+        return prompt
+
         
         
     @staticmethod

@@ -24,29 +24,37 @@ class LLMProcessor:
                 return False
         return True
     
-    def structure_resume_data(self, resume_text: str) -> Optional[Dict[str, Any]]:
+    def structure_resume_data(self, resume_text: dict) -> Optional[Dict[str, Any]]:
         
         if not self._initialize_llm():
             return None
-        
-        # Define the structured prompt for resume data extraction
-        prompt = self.prompts.resume_extraction_prompt(resume_text=resume_text)
-        
+
+        current_response = ""  # empty on first page
+
         try:
-            # Use the Groq client to process the resume
-            response = self.llm.invoke(prompt)
-            
-            # Extract the JSON from the response
-            parsed_data = self.response_handler._parse_llm_response(response)
-            structured_data = self.response_handler._validate_and_clean_resume(parsed_data)
-            
+            for page_num, page_content in resume_text.items():
+                # Build prompt with the raw response from previous iteration
+                prompt = self.prompts.resume_extraction_prompt(
+                    resume_text=page_content,
+                    existing_json=current_response  # raw string injected
+                )
+
+                # Call LLM
+                response = self.llm.invoke(prompt)
+
+                # Use the raw LLM response for the next page
+                current_response = response
+
+            # Final post-processing: parse and validate only once
+            structured_data = self.response_handler._parse_llm_response(current_response)
+            structured_data = self.response_handler._validate_and_clean_resume(structured_data)
             return structured_data
-            
+
         except Exception as e:
             st.error(f"Error processing resume with Groq LLM: {str(e)}")
             return None
-        
-        
+
+
     def job_description_generator(self, job_num, job_domain:str) -> Optional[Dict[str, Any]]:
         if not self._initialize_llm():
             return None

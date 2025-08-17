@@ -6,7 +6,7 @@ import io
 class FileProcessor:
     
     @staticmethod
-    def extract_text_from_pdf(uploaded_file) -> str:
+    def extract_text_from_pdf(uploaded_file) -> dict:
         try:
             # Reset file pointer to beginning
             uploaded_file.seek(0)
@@ -17,16 +17,18 @@ class FileProcessor:
             # Open PDF document from bytes
             pdf_document = fitz.open(stream=pdf_content, filetype="pdf")
             
-            text = ""
+            page_dict = {}
             for page_num in range(pdf_document.page_count):
                 page = pdf_document[page_num]
-                text += page.get_text() + "\n"
-            
+                page_text = page.get_text().strip()
+                page_dict[page_num + 1] = page_text  # Page numbers start from 1
+
             pdf_document.close()
-            return text.strip()
+            return page_dict
+
         except Exception as e:
             st.error(f"Error reading PDF: {str(e)}")
-            return ""
+            return {}
     
     @staticmethod
     def extract_text_from_docx(uploaded_file) -> str:

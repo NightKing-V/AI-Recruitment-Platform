@@ -42,7 +42,7 @@ class LLMProcessor:
                 logging.warning(f"Attempt {attempt}/{max_attempts} failed: {str(e)}")
                 if attempt == max_attempts:
                     logging.error("All retry attempts failed.")
-                    raise
+                    return None
                 time.sleep(delay)
 
 

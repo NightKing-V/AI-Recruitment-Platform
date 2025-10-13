@@ -62,20 +62,32 @@ class RecommendationsPage:
                 st.markdown("---")
 
                            
-                if recommendations["success"]:
-                    self.display_job_recommendations(jobs=recommendations["jobs"], scores=recommendations["scores"])
-                    st.success(f"✅ Found {len(recommendations['jobs'])} job recommendations!")
-                    st.session_state.recommendations = recommendations["jobs"]
-                    st.session_state.scores = recommendations["scores"]
-                    
-                elif recommendations["error"]:
-                    st.error(f"❌ {recommendations['error']}")
-                elif recommendations["success"] is False and not recommendations['error'] is False:
-                    st.error("An error occurred while processing your request. Please try again later.")
-                elif recommendations['success'] and not recommendations["jobs"]:
-                    st.warning("No job recommendations found. Please try again with a different resume.")
+                success_flag = recommendations.get("success", False)
+                error_message = recommendations.get("error") # Defaults to None if not found
+                jobs = recommendations.get("jobs", [])
+                scores = recommendations.get("scores", [])
+
+                # Now, we use these safe variables in our logic
+                if error_message:
+                    # If there's an explicit error message, always show it first.
+                    st.error(f"❌ {error_message}")
+
+                elif success_flag:
+                    # If the call was a success, we then check if we actually got any jobs.
+                    if jobs:
+                        # SUCCESS and JOBS FOUND
+                        self.display_job_recommendations(jobs=jobs, scores=scores)
+                        st.success(f"✅ Found {len(jobs)} job recommendations!")
+                        st.session_state.recommendations = jobs
+                        st.session_state.scores = scores
+                    else:
+                        # SUCCESS but NO JOBS FOUND
+                        st.warning("No job recommendations found. Please try again with a different resume or criteria.")
+                        
                 else:
-                    None
+                    # CATCH-ALL: If not an error and not a success, something unexpected happened.
+                    st.error("An unknown error occurred. Please try again later.")
+
             
 
     def display_job_recommendations(self, jobs: list, scores: list):
